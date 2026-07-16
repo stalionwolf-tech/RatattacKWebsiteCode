@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ProductCard, ProductCardSkeleton } from './ProductCard';
 import { FiltersSidebar } from './FiltersSidebar';
 import { SORT_OPTIONS } from '@/lib/products';
+import { deriveFilterOptions } from '@/lib/shopify-extras';
 
 const PAGE_SIZE = 12;
 
@@ -16,6 +17,9 @@ export function CategoryClient({ collection, initialProducts }) {
   const [sort, setSort] = useState('featured');
   const [visible, setVisible] = useState(PAGE_SIZE);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Filter option lists are derived from the Shopify products in this collection.
+  const filterOptions = useMemo(() => deriveFilterOptions(initialProducts), [initialProducts]);
 
   const priceOf = (p) => Number(p.priceRange.minVariantPrice.amount);
 
@@ -77,7 +81,7 @@ export function CategoryClient({ collection, initialProducts }) {
         <div className="grid lg:grid-cols-[280px_1fr] gap-8">
           {/* Sidebar */}
           <div className="hidden lg:block">
-            <FiltersSidebar state={state} setState={setState} priceMax={400} resultCount={filtered.length} />
+            <FiltersSidebar state={state} setState={setState} priceMax={400} resultCount={filtered.length} options={filterOptions} onReset={() => setState({ category: 'All', priceMin: 0, priceMax: 400, availability: null, rarity: null, brand: null, pokemonSet: null })} />
           </div>
 
           {/* Grid */}
@@ -122,7 +126,7 @@ export function CategoryClient({ collection, initialProducts }) {
                 <button onClick={() => setMobileOpen(false)} className="w-9 h-9 rounded-md flex items-center justify-center text-neutral-400 hover:text-red-400"><X className="w-5 h-5" /></button>
               </div>
               <div className="p-4">
-                <FiltersSidebar state={state} setState={setState} priceMax={400} resultCount={filtered.length} />
+                <FiltersSidebar state={state} setState={setState} priceMax={400} resultCount={filtered.length} options={filterOptions} onReset={() => setState({ category: 'All', priceMin: 0, priceMax: 400, availability: null, rarity: null, brand: null, pokemonSet: null })} />
               </div>
             </motion.div>
           </>

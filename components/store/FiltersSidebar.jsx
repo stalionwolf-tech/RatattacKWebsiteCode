@@ -1,105 +1,105 @@
 'use client';
-import { motion } from 'framer-motion';
-import { Slider } from '@/components/ui/slider';
-import { CATEGORIES, RARITIES, BRANDS, POKEMON_SETS } from '@/lib/products';
+import { useState } from 'react';
+import { X, ChevronDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
-function FilterGroup({ title, children }) {
+/**
+ * Generic filter sidebar. Options are supplied by the parent (which derives
+ * them from live Shopify products). This component is data-agnostic — it
+ * never imports catalog information directly.
+ */
+export function FiltersSidebar({ state, setState, onReset, options = {} }) {
+  const [priceOpen, setPriceOpen] = useState(true);
+  const [availabilityOpen, setAvailabilityOpen] = useState(true);
+  const [categoryOpen, setCategoryOpen] = useState(true);
+  const [rarityOpen, setRarityOpen]   = useState(false);
+  const [setOpen, setSetOpen]         = useState(false);
+  const [brandOpen, setBrandOpen]     = useState(false);
+
+  const set = (k) => (v) => setState((s) => ({ ...s, [k]: v }));
+  const toggle = (k) => (v) => setState((s) => ({ ...s, [k]: s[k] === v ? null : v }));
+
+  const productTypes = options.productTypes || [];
+  const rarities     = options.rarities     || [];
+  const sets         = options.sets         || [];
+  const brands       = options.brands       || [];
+
+  const AVAILABILITY = [
+    { value: 'in_stock',    label: 'In Stock' },
+    { value: 'low_stock',   label: 'Low Stock' },
+    { value: 'coming_soon', label: 'Coming Soon' },
+    { value: 'sold_out',    label: 'Sold Out' },
+  ];
+
   return (
-    <div className="border-b border-neutral-900 pb-5 mb-5 last:border-b-0 last:mb-0 last:pb-0">
-      <h4 className="font-cinzel text-[11px] uppercase tracking-[0.3em] text-red-500 mb-3">{title}</h4>
-      <div className="space-y-2">{children}</div>
+    <aside className="w-full lg:w-64 space-y-5 lg:sticky lg:top-24 lg:self-start">
+      <div className="flex items-center justify-between">
+        <h3 className="font-cinzel text-sm uppercase tracking-widest text-red-500">Filters</h3>
+        <button onClick={onReset} className="text-[10px] text-neutral-400 hover:text-red-400 uppercase tracking-widest font-cinzel flex items-center gap-1">
+          <X className="w-3 h-3" /> Reset
+        </button>
+      </div>
+
+      {productTypes.length > 0 && (
+        <Group title="Category" open={categoryOpen} onToggle={() => setCategoryOpen((v) => !v)}>
+          {['All', ...productTypes].map((c) => (
+            <FilterButton key={c} active={state.category === c} onClick={() => set('category')(c)}>{c}</FilterButton>
+          ))}
+        </Group>
+      )}
+
+      <Group title="Price" open={priceOpen} onToggle={() => setPriceOpen((v) => !v)}>
+        <div className="px-2 py-3 space-y-2">
+          <div className="flex items-center gap-2 text-xs text-neutral-400 font-cinzel">
+            <span>${state.priceMin}</span> <span className="flex-1 text-center opacity-50">—</span> <span>${state.priceMax}</span>
+          </div>
+          <input type="range" min={0} max={500} value={state.priceMax} onChange={(e) => set('priceMax')(Number(e.target.value))} className="w-full accent-red-600" />
+        </div>
+      </Group>
+
+      <Group title="Availability" open={availabilityOpen} onToggle={() => setAvailabilityOpen((v) => !v)}>
+        {AVAILABILITY.map((a) => (
+          <FilterButton key={a.value} active={state.availability === a.value} onClick={() => toggle('availability')(a.value)}>{a.label}</FilterButton>
+        ))}
+      </Group>
+
+      {rarities.length > 0 && (
+        <Group title="Rarity" open={rarityOpen} onToggle={() => setRarityOpen((v) => !v)}>
+          {rarities.map((r) => <FilterButton key={r} active={state.rarity === r} onClick={() => toggle('rarity')(r)}>{r}</FilterButton>)}
+        </Group>
+      )}
+
+      {sets.length > 0 && (
+        <Group title="Set" open={setOpen} onToggle={() => setSetOpen((v) => !v)}>
+          {sets.map((s) => <FilterButton key={s} active={state.pokemonSet === s} onClick={() => toggle('pokemonSet')(s)}>{s}</FilterButton>)}
+        </Group>
+      )}
+
+      {brands.length > 0 && (
+        <Group title="Brand" open={brandOpen} onToggle={() => setBrandOpen((v) => !v)}>
+          {brands.map((b) => <FilterButton key={b} active={state.brand === b} onClick={() => toggle('brand')(b)}>{b}</FilterButton>)}
+        </Group>
+      )}
+    </aside>
+  );
+}
+
+function Group({ title, open, onToggle, children }) {
+  return (
+    <div className="glass-panel rounded-lg overflow-hidden border border-neutral-900">
+      <button onClick={onToggle} className="w-full flex items-center justify-between px-4 py-3 hover:bg-red-950/20">
+        <span className="text-xs uppercase tracking-widest font-cinzel text-neutral-200">{title}</span>
+        <ChevronDown className={`w-4 h-4 text-neutral-500 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open ? <div className="p-2 grid gap-1">{children}</div> : null}
     </div>
   );
 }
 
-function Radio({ label, value, active, onClick, count }) {
+function FilterButton({ active, onClick, children }) {
   return (
-    <button
-      onClick={() => onClick(value)}
-      className={`w-full flex items-center justify-between gap-3 px-3 py-2 rounded-md text-left text-sm transition-premium ${
-        active ? 'bg-red-950/60 border border-red-800 text-white' : 'text-neutral-400 hover:bg-red-950/30 hover:text-white border border-transparent'
-      }`}
-    >
-      <span className="flex items-center gap-2">
-        <span className={`w-2 h-2 rounded-full ${active ? 'bg-red-500 shadow-[0_0_8px_rgba(220,38,38,0.8)]' : 'bg-neutral-700'}`} />
-        {label}
-      </span>
-      {typeof count === 'number' && <span className="text-[10px] text-neutral-500">{count}</span>}
+    <button onClick={onClick} className={`text-left px-3 py-2 rounded-md text-xs font-cinzel tracking-wide transition-colors ${active ? 'bg-red-950/50 text-red-300 border border-red-800/70' : 'text-neutral-300 hover:bg-red-950/20 hover:text-red-300'}`}>
+      {children}
     </button>
-  );
-}
-
-export function FiltersSidebar({ state, setState, priceMax = 400, resultCount = 0 }) {
-  const set = (patch) => setState((s) => ({ ...s, ...patch }));
-  return (
-    <motion.aside
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.5 }}
-      className="glass-panel frame-corners rounded-xl p-5 md:p-6 sticky top-24"
-    >
-      <div className="flex items-center justify-between mb-5">
-        <h3 className="font-cinzel text-lg text-white">Filters</h3>
-        <span className="text-[10px] uppercase tracking-[0.3em] text-neutral-500 font-cinzel">{resultCount} results</span>
-      </div>
-
-      <FilterGroup title="Category">
-        {CATEGORIES.map((c) => (
-          <Radio key={c} label={c} value={c} active={state.category === c} onClick={(v) => set({ category: v })} />
-        ))}
-      </FilterGroup>
-
-      <FilterGroup title="Price">
-        <div className="px-1">
-          <Slider
-            value={[state.priceMin ?? 0, state.priceMax ?? priceMax]}
-            min={0}
-            max={priceMax}
-            step={5}
-            onValueChange={([mn, mx]) => set({ priceMin: mn, priceMax: mx })}
-            className="my-4"
-          />
-          <div className="flex justify-between text-xs text-neutral-400 font-cinzel">
-            <span>${state.priceMin ?? 0}</span>
-            <span>${state.priceMax ?? priceMax}+</span>
-          </div>
-        </div>
-      </FilterGroup>
-
-      <FilterGroup title="Availability">
-        <Radio label="All"          value={null}         active={!state.availability}                onClick={(v) => set({ availability: v })} />
-        <Radio label="In Stock"     value="in_stock"     active={state.availability === 'in_stock'}   onClick={(v) => set({ availability: v })} />
-        <Radio label="Low Stock"    value="low_stock"    active={state.availability === 'low_stock'}  onClick={(v) => set({ availability: v })} />
-        <Radio label="Coming Soon"  value="coming_soon"  active={state.availability === 'coming_soon'} onClick={(v) => set({ availability: v })} />
-      </FilterGroup>
-
-      <FilterGroup title="Pokémon Set">
-        <Radio label="All" value={null} active={!state.pokemonSet} onClick={(v) => set({ pokemonSet: v })} />
-        {POKEMON_SETS.map((s) => (
-          <Radio key={s} label={s} value={s} active={state.pokemonSet === s} onClick={(v) => set({ pokemonSet: v })} />
-        ))}
-      </FilterGroup>
-
-      <FilterGroup title="Rarity">
-        <Radio label="All" value={null} active={!state.rarity} onClick={(v) => set({ rarity: v })} />
-        {RARITIES.map((r) => (
-          <Radio key={r} label={r} value={r} active={state.rarity === r} onClick={(v) => set({ rarity: v })} />
-        ))}
-      </FilterGroup>
-
-      <FilterGroup title="Brand">
-        <Radio label="All" value={null} active={!state.brand} onClick={(v) => set({ brand: v })} />
-        {BRANDS.map((b) => (
-          <Radio key={b} label={b} value={b} active={state.brand === b} onClick={(v) => set({ brand: v })} />
-        ))}
-      </FilterGroup>
-
-      <button
-        onClick={() => setState({ category: 'All', priceMin: 0, priceMax: priceMax, availability: null, rarity: null, brand: null, pokemonSet: null })}
-        className="w-full mt-2 text-xs uppercase tracking-[0.3em] text-neutral-400 hover:text-red-400 font-cinzel py-2 transition-colors"
-      >
-        Reset All
-      </button>
-    </motion.aside>
   );
 }

@@ -10,14 +10,14 @@ import { AtmosphereBackground } from '@/components/site/AtmosphereBackground';
 import { ScrollingBackdrop } from '@/components/site/ScrollingBackdrop';
 import { CinematicIntro } from '@/components/site/CinematicIntro';
 import { FilmGrain, Scanlines } from '@/components/site/CinematicFX';
-import { getAllProductsLive } from '@/lib/shopify';
+import { getFeaturedProductsLive } from '@/lib/shopify-extras';
 
 export const dynamic = 'force-dynamic';
 
 const App = async () => {
-  // Featured products come exclusively from Shopify. Empty state renders when there are none.
-  const { products } = await getAllProductsLive({ first: 6 });
-  const featured = products.slice(0, 6);
+  // Featured products from the Shopify "featured" collection.
+  // If that collection doesn't exist, falls back to newest products.
+  const { products } = await getFeaturedProductsLive({ first: 6 });
 
   return (
     <div className="relative min-h-screen bg-black text-neutral-100 overflow-x-hidden">
@@ -30,7 +30,7 @@ const App = async () => {
       <main className="relative z-10">
         <HeroSection />
         <AboutSection />
-        <FeaturedStoreSection featured={featured} />
+        <FeaturedStoreSection featured={products} />
         <CommunitySection />
         <VideosSection />
         <ContactSection />

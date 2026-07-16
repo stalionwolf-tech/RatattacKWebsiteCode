@@ -4,19 +4,39 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X } from 'lucide-react';
 import { ProductArtwork } from './ProductArtwork';
-import { formatPrice, searchProducts, COLLECTIONS } from '@/lib/products';
+import { formatPrice } from '@/lib/products';
 
+/**
+ * Search dropdown — fetches all live Shopify products once on first focus,
+ * then filters in-memory as the user types. Zero hardcoded product data.
+ */
 export function SearchDropdown({ compact = false, onNavigate }) {
   const [q, setQ] = useState('');
   const [open, setOpen] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [loaded, setLoaded] = useState(false);
   const ref = useRef(null);
 
-  const results = useMemo(() => searchProducts(q, 6), [q]);
-  const collectionMatches = useMemo(() => {
-    const s = q.trim().toLowerCase();
-    if (!s) return [];
-    return COLLECTIONS.filter((c) => c.title.toLowerCase().includes(s)).slice(0, 4);
-  }, [q]);
+  const load = async () => {
+    if (loaded) return;
+    try {
+      const res = await fetch('/api/shopify/products?first=100');
+      if (!res.ok) return;
+      const data = await res.json();
+      setProducts(data?.products || []);
+    } catch { /* ignore */ }
+    finally { setLoaded(true); }
+  };
+
+  const results = useMemo(() => {
+    const needle = q.trim().toLowerCase();
+    if (!needle) return [];
+    return products.filter((p) => {
+      const hay = [p.title, p.productType, p.vendor, p.rarity, p.pokemonSet, ...(p.tags || [])]
+        .filter(Boolean).map((s) => String(s).toLowerCase()).join(' | ');
+      return hay.includes(needle);
+    }).slice(0, 6);
+  }, [q, products]);
 
   useEffect(() => {
     const onDoc = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
@@ -32,9 +52,9 @@ export function SearchDropdown({ compact = false, onNavigate }) {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500 pointer-events-none" />
         <input
           value={q}
-          onChange={(e) => { setQ(e.target.value); setOpen(true); }}
-          onFocus={() => setOpen(true)}
-          placeholder="Search products, sets, collections…"
+          onChange={(e) => { setQ(e.target.value); setOpen(true); load(); }}
+          onFocus={() => { setOpen(true); load(); }}
+          placeholder="Search products…"
           className="w-full bg-black/50 border border-neutral-800 focus:border-red-600 focus:ring-red-600/30 rounded-md pl-10 pr-9 h-10 text-sm text-neutral-100 outline-none focus:ring-2 transition-premium"
           aria-label="Search the store"
         />
@@ -48,24 +68,9 @@ export function SearchDropdown({ compact = false, onNavigate }) {
       <AnimatePresence>
         {open && q && (
           <motion.div
-            initial={{ opacity: 0, y: -6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.2 }}
+            initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.2 }}
             className="absolute top-full left-0 right-0 mt-2 bg-neutral-950/95 backdrop-blur-xl border border-red-900/40 rounded-xl shadow-[0_20px_60px_rgba(0,0,0,0.7)] overflow-hidden z-50"
           >
-            {collectionMatches.length > 0 && (
-              <div className="p-3 border-b border-neutral-900">
-                <div className="text-[10px] uppercase tracking-[0.3em] text-neutral-500 font-cinzel mb-2 px-1">Collections</div>
-                <div className="flex flex-wrap gap-2">
-                  {collectionMatches.map((c) => (
-                    <Link key={c.slug} onClick={nav} href={`/store/category/${c.slug}`} className="px-3 py-1.5 rounded-md bg-red-950/50 border border-red-900/60 text-red-300 text-xs uppercase tracking-widest font-cinzel hover:border-red-600 transition-premium">
-                      {c.title}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
             {results.length > 0 ? (
               <ul className="max-h-80 overflow-y-auto">
                 {results.map((p) => (
@@ -82,9 +87,14 @@ export function SearchDropdown({ compact = false, onNavigate }) {
                     </Link>
                   </li>
                 ))}
+                <li className="border-t border-neutral-900">
+                  <Link onClick={nav} href={`/search?q=${encodeURIComponent(q)}`} className="block px-4 py-2.5 text-center text-[10px] uppercase tracking-widest font-cinzel text-neutral-400 hover:text-red-400">
+                    See all results →
+                  </Link>
+                </li>
               </ul>
-            ) : collectionMatches.length === 0 && (
-              <div className="p-6 text-center text-sm text-neutral-500">No matches for “{q}”.</div>
+            ) : (
+              <div className="p-6 text-center text-sm text-neutral-500">{loaded ? `No matches for “${q}”.` : 'Searching…'}</div>
             )}
           </motion.div>
         )}

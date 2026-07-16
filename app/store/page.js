@@ -6,30 +6,30 @@ import { FilmGrain, Scanlines } from '@/components/site/CinematicFX';
 import { CartDrawer } from '@/components/store/CartDrawer';
 import { StoreHomeClient } from '@/components/store/StoreHomeClient';
 import { EmptyStore } from '@/components/store/EmptyStore';
-import { COLLECTIONS, CURRENT_PROMOS } from '@/lib/products';
+import { CURRENT_PROMOS } from '@/lib/products';
 import { getAllProductsLive } from '@/lib/shopify';
-import { Toaster } from '@/components/ui/sonner';
+import { getCollectionsLive, getFeaturedProductsLive, getSaleProductsLive } from '@/lib/shopify-extras';
 import { RecentlyViewed } from '@/components/store/RecentlyViewed';
+import { Toaster } from '@/components/ui/sonner';
 
 export const dynamic = 'force-dynamic';
-
 export const metadata = {
   title: 'Store — RatAttacK',
-  description: 'Pokémon TCG, RatAttacK merchandise, and exclusive collectibles. Collect. Open. Conquer.',
+  description: 'Pokémon TCG, RatAttacK merchandise, and exclusive collectibles from the RatAttacK vault.',
 };
 
 export default async function StorePage() {
-  const featuredCollections = COLLECTIONS.filter((c) =>
-    ['booster-boxes','elite-trainer-boxes','singles','merch','mystery-packs','accessories'].includes(c.slug)
-  );
+  // Everything below comes exclusively from Shopify. No mock, no hardcoding.
+  const [{ collections }, { products: pool }, { products: featured }, { products: onSale }] = await Promise.all([
+    getCollectionsLive({ first: 20 }),
+    getAllProductsLive({ first: 60 }),
+    getFeaturedProductsLive({ first: 8 }),
+    getSaleProductsLive({ first: 8 }),
+  ]);
 
-  // Live Shopify catalog only. No mock fallback anywhere.
-  const { products: pool, empty } = await getAllProductsLive({ first: 50 });
-
-  const featured    = pool.slice(0, 8);
-  const newArrivals = pool.filter((p) => p.isNew).slice(0, 8);
+  const catalogEmpty = pool.length === 0;
+  const newArrivals = [...pool].sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || '')).slice(0, 8);
   const bestSellers = [...pool].sort((a, b) => (b.salesCount ?? 0) - (a.salesCount ?? 0)).slice(0, 8);
-  const recent      = [...pool].sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || '')).slice(0, 8);
 
   return (
     <div className="relative min-h-screen bg-black text-neutral-100 overflow-x-hidden">
@@ -42,17 +42,18 @@ export default async function StorePage() {
       <Toaster theme="dark" position="bottom-right" />
 
       <main className="relative z-10">
-        {empty ? (
+        {catalogEmpty ? (
           <div className="pt-24 md:pt-32">
             <EmptyStore />
           </div>
         ) : (
           <StoreHomeClient
-            featuredCollections={featuredCollections}
+            featuredCollections={collections}
             featured={featured}
             newArrivals={newArrivals}
             bestSellers={bestSellers}
-            recent={recent}
+            recent={newArrivals}
+            onSale={onSale}
             promos={CURRENT_PROMOS}
           />
         )}
