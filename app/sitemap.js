@@ -1,5 +1,10 @@
 import { SITE_CONFIG } from '@/lib/config';
 
+// The sitemap fetches Shopify products at request time. Mark explicitly dynamic
+// so Vercel doesn't attempt to prerender it during the build phase.
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 // Prefer NEXT_PUBLIC_BASE_URL, fall back to production domain constant.
 const SITE_URL = (process.env.NEXT_PUBLIC_BASE_URL || 'https://ratattack.gg').replace(/\/$/, '');
 
