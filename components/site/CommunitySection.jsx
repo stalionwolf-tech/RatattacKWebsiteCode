@@ -1,18 +1,20 @@
 'use client';
 import { motion } from 'framer-motion';
-import { MessageCircle, Users, Zap, Shield } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SectionHeader } from './SectionHeader';
+import { IconHorde, IconBolt, IconShield } from './MedievalIcons';
+import { DISCORD_URL } from '@/lib/constants';
 
 const PERKS = [
-  { icon: Users, label: 'Active Community' },
-  { icon: Zap, label: 'Live Squad-Ups' },
-  { icon: Shield, label: 'Loot & Giveaways' },
+  { Icon: IconHorde, label: 'Active Community' },
+  { Icon: IconBolt, label: 'Live Squad-Ups' },
+  { Icon: IconShield, label: 'Loot & Giveaways' },
 ];
 
 export function CommunitySection() {
   return (
-    <section id="community" className="relative py-24 md:py-32 overflow-hidden">
+    <section id="community" className="relative py-28 md:py-40 overflow-hidden">
       <div
         className="absolute inset-0 bg-cover bg-center opacity-20"
         style={{
@@ -34,40 +36,42 @@ export function CommunitySection() {
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.7 }}
-          className="max-w-4xl mx-auto glass-panel rounded-2xl p-8 md:p-12 relative overflow-hidden"
+          transition={{ duration: 0.9, ease: [0.19, 1, 0.22, 1] }}
+          className="max-w-5xl mx-auto glass-panel frame-corners rounded-2xl p-8 md:p-14 relative overflow-hidden"
         >
-          {/* Decorative glow */}
-          <div className="absolute -top-24 -right-24 w-72 h-72 bg-red-600/20 rounded-full blur-3xl" />
+          <div className="absolute -top-24 -right-24 w-72 h-72 bg-red-600/20 rounded-full blur-3xl animate-pulse-glow" />
           <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-indigo-600/20 rounded-full blur-3xl" />
 
-          <div className="relative grid md:grid-cols-2 gap-8 items-center">
+          <div className="relative grid md:grid-cols-2 gap-10 items-center">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-950/50 border border-red-800/50 mb-5">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-red-950/60 border border-red-800/50 mb-6">
                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                <span className="text-xs uppercase tracking-widest text-neutral-300 font-cinzel">Online • Active Now</span>
+                <span className="text-[10px] uppercase tracking-[0.3em] text-neutral-300 font-cinzel">Online • Active Now</span>
               </div>
-              <h3 className="font-cinzel text-3xl md:text-4xl font-bold text-white mb-4">
+              <h3 className="font-cinzel text-3xl md:text-5xl font-bold text-white mb-5 leading-tight">
                 Enter the <span className="text-red-500 text-glow">Rat's Nest</span>
               </h3>
-              <p className="text-neutral-400 mb-6 leading-relaxed">
+              <p className="text-neutral-400 mb-8 leading-loose text-base md:text-lg">
                 A gathering hall for goblins, knights, and everyone in between. Voice channels, LFG for extractions, patch talk, giveaways, and a memes shrine.
               </p>
-              <div className="space-y-2 mb-8">
+              <div className="space-y-3 mb-10">
                 {PERKS.map((p) => (
-                  <div key={p.label} className="flex items-center gap-3 text-neutral-300">
-                    <p.icon className="w-4 h-4 text-red-500 flex-shrink-0" />
-                    <span className="text-sm">{p.label}</span>
+                  <div key={p.label} className="flex items-center gap-4 text-neutral-200 group">
+                    <div className="w-9 h-9 rounded-md flex items-center justify-center bg-red-950/50 border border-red-900/60 text-red-500 group-hover:border-red-600 group-hover:text-red-400 transition-premium">
+                      <p.Icon size={20} />
+                    </div>
+                    <span className="text-sm md:text-base font-medium">{p.label}</span>
                   </div>
                 ))}
               </div>
               <Button
                 asChild
                 size="lg"
-                className="btn-glow-red bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 h-13 px-8 border border-red-900 glow-red animate-pulse-glow"
+                className="btn-glow-red bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 h-14 px-10 border border-red-900 glow-red animate-pulse-glow transition-premium"
               >
-                <a href="https://discord.gg/ratattack" target="_blank" rel="noopener noreferrer">
-                  <MessageCircle className="w-5 h-5 mr-2" /> Join the Discord
+                <a href={DISCORD_URL} target="_blank" rel="noopener noreferrer">
+                  <MessageCircle className="w-5 h-5 mr-3" />
+                  <span className="font-cinzel tracking-widest uppercase text-sm">Join the Discord</span>
                 </a>
               </Button>
             </div>
@@ -78,11 +82,19 @@ export function CommunitySection() {
                 { num: '380', label: 'Online' },
                 { num: '24/7', label: 'Chatter' },
                 { num: '∞', label: 'Cursed Loot' },
-              ].map((s) => (
-                <div key={s.label} className="text-center p-5 rounded-lg border border-red-900/30 bg-black/40 backdrop-blur-sm">
-                  <div className="font-cinzel text-3xl md:text-4xl font-black text-white text-glow mb-1">{s.num}</div>
-                  <div className="text-xs uppercase tracking-widest text-neutral-500">{s.label}</div>
-                </div>
+              ].map((s, i) => (
+                <motion.div
+                  key={s.label}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: i * 0.1 }}
+                  whileHover={{ scale: 1.05 }}
+                  className="text-center p-6 rounded-lg border border-red-900/40 bg-black/50 backdrop-blur-sm hover:border-red-700 transition-premium"
+                >
+                  <div className="font-cinzel text-3xl md:text-5xl font-black text-white text-glow mb-2 leading-none">{s.num}</div>
+                  <div className="text-[10px] uppercase tracking-[0.3em] text-neutral-500 font-cinzel">{s.label}</div>
+                </motion.div>
               ))}
             </div>
           </div>

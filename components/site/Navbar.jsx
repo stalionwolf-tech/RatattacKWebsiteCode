@@ -1,9 +1,11 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Youtube } from 'lucide-react';
+import { Youtube } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Logo } from './Logo';
+import { IconMenu, IconClose } from './MedievalIcons';
+import { YOUTUBE_CHANNEL_URL } from '@/lib/constants';
 
 const NAV_LINKS = [
   { href: '#videos', label: 'Videos' },
@@ -60,7 +62,7 @@ export function Navbar() {
               asChild
               className="bg-red-700 hover:bg-red-600 text-white border border-red-900 btn-glow-red animate-pulse-glow"
             >
-              <a href="https://www.youtube.com/channel/UCro3AjNRHR1Jbd-P2IVztFA?sub_confirmation=1" target="_blank" rel="noopener noreferrer">
+              <a href={YOUTUBE_CHANNEL_URL} target="_blank" rel="noopener noreferrer">
                 <Youtube className="w-4 h-4 mr-2" /> Subscribe
               </a>
             </Button>
@@ -71,7 +73,7 @@ export function Navbar() {
             className="lg:hidden p-2 text-neutral-200 hover:text-red-500 transition-colors"
             aria-label="Toggle menu"
           >
-            {open ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {open ? <IconClose size={22} /> : <IconMenu size={22} />}
           </button>
         </div>
       </div>
@@ -97,7 +99,7 @@ export function Navbar() {
                 </a>
               ))}
               <Button asChild className="bg-red-700 hover:bg-red-600 w-full mt-2">
-                <a href="https://www.youtube.com/channel/UCro3AjNRHR1Jbd-P2IVztFA?sub_confirmation=1" target="_blank" rel="noopener noreferrer">
+                <a href={YOUTUBE_CHANNEL_URL} target="_blank" rel="noopener noreferrer">
                   <Youtube className="w-4 h-4 mr-2" /> Subscribe on YouTube
                 </a>
               </Button>

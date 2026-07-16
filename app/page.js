@@ -7,7 +7,7 @@ import { TCGSection } from '@/components/site/TCGSection';
 import { MerchSection } from '@/components/site/MerchSection';
 import { ContactSection } from '@/components/site/ContactSection';
 import { Footer } from '@/components/site/Footer';
-import { ParticleBackground } from '@/components/site/ParticleBackground';
+import { AtmosphereBackground } from '@/components/site/AtmosphereBackground';
 import { CinematicIntro } from '@/components/site/CinematicIntro';
 import { FilmGrain, Scanlines } from '@/components/site/CinematicFX';
 
@@ -15,7 +15,7 @@ const App = () => {
   return (
     <div className="relative min-h-screen bg-black text-neutral-100 overflow-x-hidden">
       <CinematicIntro />
-      <ParticleBackground />
+      <AtmosphereBackground />
       <FilmGrain />
       <Scanlines />
       <Navbar />
