@@ -1,7 +1,10 @@
 'use client';
+import { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Play, Eye, Clock } from 'lucide-react';
+import { Play, Eye, Clock, Youtube } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { SectionHeader } from './SectionHeader';
 
 const VIDEOS = [
   {
@@ -30,9 +33,101 @@ const VIDEOS = [
   },
 ];
 
-import { SectionHeader } from './SectionHeader';
-import { Button } from '@/components/ui/button';
-import { Youtube } from 'lucide-react';
+function TiltCard({ video, index }) {
+  const ref = useRef(null);
+  const [tilt, setTilt] = useState({ x: 0, y: 0, sx: 50, sy: 50 });
+
+  const handleMove = (e) => {
+    const el = ref.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    setTilt({
+      x: (y - 0.5) * -10,
+      y: (x - 0.5) * 12,
+      sx: x * 100,
+      sy: y * 100,
+    });
+  };
+  const reset = () => setTilt({ x: 0, y: 0, sx: 50, sy: 50 });
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 60 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-50px' }}
+      transition={{ duration: 0.8, delay: index * 0.15, ease: [0.19, 1, 0.22, 1] }}
+      style={{ perspective: 1200 }}
+    >
+      <motion.div
+        ref={ref}
+        onMouseMove={handleMove}
+        onMouseLeave={reset}
+        animate={{ rotateX: tilt.x, rotateY: tilt.y }}
+        transition={{ type: 'spring', stiffness: 250, damping: 20 }}
+        style={{ transformStyle: 'preserve-3d' }}
+        className="h-full"
+      >
+        <Card className="group relative overflow-hidden glass-panel hover:border-red-600/70 transition-colors duration-500 cursor-pointer h-full">
+          <a href={`https://youtube.com/watch?v=${video.id}`} target="_blank" rel="noopener noreferrer" className="block">
+            <div className="relative aspect-video overflow-hidden">
+              <img
+                src={video.thumb}
+                alt={video.title}
+                loading="lazy"
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.4s] ease-out saturate-75 group-hover:saturate-100 contrast-125"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent" />
+
+              {/* Spotlight cursor */}
+              <div
+                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+                style={{
+                  background: `radial-gradient(circle at ${tilt.sx}% ${tilt.sy}%, rgba(220,38,38,0.35), transparent 40%)`,
+                }}
+              />
+
+              {/* Duration */}
+              <div className="absolute bottom-3 right-3 flex items-center gap-1 px-2 py-1 bg-black/80 backdrop-blur-sm rounded text-xs text-neutral-200 border border-neutral-800">
+                <Clock className="w-3 h-3" /> {video.duration}
+              </div>
+
+              {/* Game tag */}
+              <div className="absolute top-3 left-3 px-2.5 py-1 bg-red-900/90 backdrop-blur-sm rounded text-[10px] uppercase tracking-widest text-red-100 border border-red-700 font-cinzel">
+                {video.game}
+              </div>
+
+              {/* Play overlay */}
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <motion.div
+                  animate={{ scale: [1, 1.08, 1] }}
+                  transition={{ duration: 1.8, repeat: Infinity }}
+                  className="w-16 h-16 rounded-full bg-red-600/90 flex items-center justify-center glow-red-strong"
+                >
+                  <Play className="w-7 h-7 text-white fill-white ml-1" />
+                </motion.div>
+              </div>
+            </div>
+
+            <div className="p-5">
+              <h3 className="font-cinzel text-lg font-semibold text-white group-hover:text-red-400 transition-colors line-clamp-2 leading-snug mb-3">
+                {video.title}
+              </h3>
+              <div className="flex items-center gap-3 text-xs text-neutral-500">
+                <span className="flex items-center gap-1">
+                  <Eye className="w-3.5 h-3.5" /> {video.views} views
+                </span>
+                <span className="w-1 h-1 rounded-full bg-neutral-700" />
+                <span>RatAttacK</span>
+              </div>
+            </div>
+          </a>
+        </Card>
+      </motion.div>
+    </motion.div>
+  );
+}
 
 export function VideosSection() {
   return (
@@ -48,65 +143,7 @@ export function VideosSection() {
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {VIDEOS.map((v, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-50px' }}
-              transition={{ duration: 0.6, delay: i * 0.1 }}
-              whileHover={{ y: -6 }}
-            >
-              <Card className="group relative overflow-hidden glass-panel hover:border-red-600/60 transition-all duration-500 cursor-pointer h-full">
-                <a
-                  href={`https://youtube.com/watch?v=${v.id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block"
-                >
-                  <div className="relative aspect-video overflow-hidden">
-                    <img
-                      src={v.thumb}
-                      alt={v.title}
-                      loading="lazy"
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.2s] ease-out saturate-75 group-hover:saturate-100"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent" />
-
-                    {/* Duration badge */}
-                    <div className="absolute bottom-3 right-3 flex items-center gap-1 px-2 py-1 bg-black/80 backdrop-blur-sm rounded text-xs text-neutral-200 border border-neutral-800">
-                      <Clock className="w-3 h-3" /> {v.duration}
-                    </div>
-
-                    {/* Game tag */}
-                    <div className="absolute top-3 left-3 px-2.5 py-1 bg-red-900/80 backdrop-blur-sm rounded text-[10px] uppercase tracking-widest text-red-100 border border-red-700 font-cinzel">
-                      {v.game}
-                    </div>
-
-                    {/* Play overlay */}
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <div className="w-16 h-16 rounded-full bg-red-600/90 flex items-center justify-center glow-red-strong scale-90 group-hover:scale-100 transition-transform duration-300">
-                        <Play className="w-7 h-7 text-white fill-white ml-1" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="p-5">
-                    <h3 className="font-cinzel text-lg font-semibold text-white group-hover:text-red-400 transition-colors line-clamp-2 leading-snug mb-3">
-                      {v.title}
-                    </h3>
-                    <div className="flex items-center gap-3 text-xs text-neutral-500">
-                      <span className="flex items-center gap-1">
-                        <Eye className="w-3.5 h-3.5" /> {v.views} views
-                      </span>
-                      <span className="w-1 h-1 rounded-full bg-neutral-700" />
-                      <span>RatAttacK</span>
-                    </div>
-                  </div>
-                </a>
-              </Card>
-            </motion.div>
-          ))}
+          {VIDEOS.map((v, i) => <TiltCard key={i} video={v} index={i} />)}
         </div>
 
         <motion.div
