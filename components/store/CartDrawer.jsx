@@ -1,16 +1,19 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
+import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ProductArtwork } from './ProductArtwork';
 import { getProductByHandle, formatPrice } from '@/lib/products';
 import { useCart, CART_OPEN_EVENT } from '@/lib/store-hooks';
-import { useState } from 'react';
+import { toast } from 'sonner';
 
 export function CartDrawer() {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [checkingOut, setCheckingOut] = useState(false);
   const { items, subtotal, shipping, tax, total, count, setQuantity, remove } = useCart();
 
   useEffect(() => {
@@ -32,6 +35,35 @@ export function CartDrawer() {
   }, [open]);
 
   const close = () => setOpen(false);
+
+  const handleCheckout = async () => {
+    if (!items.length) return;
+    setCheckingOut(true);
+    try {
+      const lines = items.map((i) => ({ merchandiseId: i.key, quantity: i.quantity }));
+      const res = await fetch('/api/shopify/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lines }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.checkoutUrl) { window.location.href = data.checkoutUrl; return; }
+      }
+      if (res.status === 422) {
+        toast.info('Preview cart — loading demo checkout.');
+        close();
+        router.push('/checkout');
+        return;
+      }
+      const data = await res.json().catch(() => ({}));
+      toast.error(data?.error || 'Checkout failed.');
+    } catch (err) {
+      toast.error(err?.message || 'Network error.');
+    } finally {
+      setCheckingOut(false);
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -99,11 +131,16 @@ export function CartDrawer() {
                   <Button asChild variant="outline" onClick={close} className="h-12 border-red-800/60 bg-black/40 hover:bg-red-950/40 hover:border-red-600 text-neutral-200">
                     <Link href="/store"><span className="font-cinzel tracking-widest uppercase text-[10px]">Continue Shopping</span></Link>
                   </Button>
-                  <Button asChild onClick={close} className="h-12 bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 border border-red-900 btn-glow-red glow-red">
-                    <Link href="/checkout">
-                      <span className="font-cinzel tracking-widest uppercase text-[10px]">Checkout</span>
-                      <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
-                    </Link>
+                  <Button
+                    onClick={handleCheckout}
+                    disabled={checkingOut}
+                    className="h-12 bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 border border-red-900 btn-glow-red glow-red disabled:opacity-70"
+                  >
+                    {checkingOut ? (
+                      <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /><span className="font-cinzel tracking-widest uppercase text-[10px]">Preparing…</span></>
+                    ) : (
+                      <><span className="font-cinzel tracking-widest uppercase text-[10px]">Checkout</span><ArrowRight className="w-3.5 h-3.5 ml-1.5" /></>
+                    )}
                   </Button>
                 </div>
               </div>

@@ -6,12 +6,11 @@ import { AtmosphereBackground } from '@/components/site/AtmosphereBackground';
 import { FilmGrain, Scanlines } from '@/components/site/CinematicFX';
 import { CartDrawer } from '@/components/store/CartDrawer';
 import { CategoryClient } from '@/components/store/CategoryClient';
-import { getCollection, getProductsForCollection, COLLECTIONS } from '@/lib/products';
+import { getCollection } from '@/lib/products';
+import { getCollectionProductsLive } from '@/lib/shopify';
 import { Toaster } from '@/components/ui/sonner';
 
-export async function generateStaticParams() {
-  return COLLECTIONS.map((c) => ({ slug: c.slug }));
-}
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
@@ -23,7 +22,8 @@ export default async function CategoryPage({ params }) {
   const { slug } = await params;
   const collection = getCollection(slug);
   if (!collection) notFound();
-  const products = getProductsForCollection(slug);
+
+  const { products } = await getCollectionProductsLive(slug, { first: 48 });
 
   return (
     <div className="relative min-h-screen bg-black text-neutral-100 overflow-x-hidden">

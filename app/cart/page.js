@@ -1,7 +1,9 @@
 'use client';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, ChevronLeft } from 'lucide-react';
+import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, ChevronLeft, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Navbar } from '@/components/site/Navbar';
 import { Footer } from '@/components/site/Footer';
@@ -12,9 +14,47 @@ import { ProductArtwork } from '@/components/store/ProductArtwork';
 import { formatPrice, getProductByHandle } from '@/lib/products';
 import { useCart } from '@/lib/store-hooks';
 import { Toaster } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 
 export default function CartPage() {
+  const router = useRouter();
   const { items, subtotal, shipping, tax, total, setQuantity, remove, count } = useCart();
+  const [checkingOut, setCheckingOut] = useState(false);
+
+  // Smart checkout: if any item has a live Shopify variant GID, send those to
+  // Shopify's hosted checkout via the Storefront cart API; otherwise fall back
+  // to the local (mock) checkout page for demo/testing.
+  const handleCheckout = async () => {
+    if (!items.length) return;
+    setCheckingOut(true);
+    try {
+      const lines = items.map((i) => ({ merchandiseId: i.key, quantity: i.quantity }));
+      const res = await fetch('/api/shopify/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lines }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.checkoutUrl) {
+          window.location.href = data.checkoutUrl;
+          return;
+        }
+      }
+      if (res.status === 422) {
+        // Mock cart (or products not yet in Shopify) — go to local checkout preview
+        toast.info('Preview cart — no live Shopify items yet. Loading demo checkout.');
+        router.push('/checkout');
+        return;
+      }
+      const data = await res.json().catch(() => ({}));
+      toast.error(data?.error || 'Checkout failed. Please try again.');
+    } catch (err) {
+      toast.error(err?.message || 'Network error. Please try again.');
+    } finally {
+      setCheckingOut(false);
+    }
+  };
 
   return (
     <div className="relative min-h-screen bg-black text-neutral-100 overflow-x-hidden">
@@ -84,10 +124,25 @@ export default function CartPage() {
                 <span className="text-[10px] uppercase tracking-[0.3em] text-neutral-400 font-cinzel">Grand Total</span>
                 <span className="font-cinzel text-3xl text-red-400 text-glow">{formatPrice(total)}</span>
               </div>
-              <Button asChild size="lg" className="w-full h-14 bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 border-2 border-red-800 glow-red btn-glow-red">
-                <Link href="/checkout"><span className="font-cinzel tracking-widest uppercase text-sm">Proceed to Checkout</span><ArrowRight className="w-4 h-4 ml-2" /></Link>
+              <Button
+                onClick={handleCheckout}
+                disabled={checkingOut}
+                size="lg"
+                className="w-full h-14 bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 border-2 border-red-800 glow-red btn-glow-red disabled:opacity-70"
+              >
+                {checkingOut ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    <span className="font-cinzel tracking-widest uppercase text-sm">Preparing Checkout…</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="font-cinzel tracking-widest uppercase text-sm">Proceed to Checkout</span>
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </>
+                )}
               </Button>
-              <p className="text-[10px] text-center text-neutral-500 mt-4 uppercase tracking-widest font-cinzel">Secure checkout · SSL encrypted</p>
+              <p className="text-[10px] text-center text-neutral-500 mt-4 uppercase tracking-widest font-cinzel">Secure checkout via Shopify · SSL encrypted</p>
             </aside>
           </div>
         )}

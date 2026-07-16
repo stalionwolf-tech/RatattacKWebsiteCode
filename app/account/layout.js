@@ -5,11 +5,12 @@ import { ScrollingBackdrop } from '@/components/site/ScrollingBackdrop';
 import { AtmosphereBackground } from '@/components/site/AtmosphereBackground';
 import { FilmGrain, Scanlines } from '@/components/site/CinematicFX';
 import { CartDrawer } from '@/components/store/CartDrawer';
-import { User, Package, Heart, Boxes, MapPin, CreditCard, ShieldCheck, Settings } from 'lucide-react';
+import { User, UserCircle, Package, Heart, Boxes, MapPin, CreditCard, ShieldCheck, Settings } from 'lucide-react';
 import { CUSTOMER } from '@/lib/account';
 
 const LINKS = [
   { href: '/account',           label: 'Overview',        icon: User },
+  { href: '/account/profile',   label: 'Profile',         icon: UserCircle },
   { href: '/account/orders',    label: 'Orders',          icon: Package },
   { href: '/account/wishlist',  label: 'Wishlist',        icon: Heart },
   { href: '/account/vault',     label: 'Vault',           icon: Boxes },

@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ChevronLeft, Lock, ShieldCheck, CreditCard, Truck, CheckCircle2, Tag } from 'lucide-react';
+import { ChevronLeft, Lock, ShieldCheck, CreditCard, Truck, CheckCircle2, Tag, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,6 +21,7 @@ export default function CheckoutPage() {
   const { items, subtotal, shipping, tax, total, count } = useCart();
   const [promo, setPromo] = useState('');
   const [discount, setDiscount] = useState(0);
+  const [placing, setPlacing] = useState(false);
   const grandTotal = Math.max(0, total - discount);
 
   const applyPromo = () => {
@@ -30,9 +31,31 @@ export default function CheckoutPage() {
     else { toast.error('Invalid code'); }
   };
 
-  const place = (e) => {
+  const place = async (e) => {
     e.preventDefault();
-    toast.info('Payment processing will activate once the Shopify integration goes live.');
+    if (!items.length) { toast.error('Your cart is empty.'); return; }
+    setPlacing(true);
+    try {
+      const lines = items.map((i) => ({ merchandiseId: i.key, quantity: i.quantity }));
+      const res = await fetch('/api/shopify/checkout', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lines }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.checkoutUrl) { window.location.href = data.checkoutUrl; return; }
+      }
+      if (res.status === 422) {
+        toast.info('Demo cart — no live Shopify items yet. Once you add these products to Shopify, checkout will route to the real hosted checkout.');
+      } else {
+        const data = await res.json().catch(() => ({}));
+        toast.error(data?.error || 'Checkout failed.');
+      }
+    } catch (err) {
+      toast.error(err?.message || 'Network error.');
+    } finally {
+      setPlacing(false);
+    }
   };
 
   return (
@@ -108,12 +131,15 @@ export default function CheckoutPage() {
                 </div>
                 <label className="flex items-center gap-2 text-xs text-neutral-400"><input type="checkbox" className="accent-red-600" defaultChecked /> Billing address same as shipping</label>
               </div>
-              <p className="text-[10px] uppercase tracking-widest text-neutral-500 font-cinzel mt-5">Payment will be securely processed via Shopify Checkout once live.</p>
+              <p className="text-[10px] uppercase tracking-widest text-neutral-500 font-cinzel mt-5">Card fields above are for preview only. Real payments run through Shopify's secure hosted checkout when you click Place Order.</p>
             </section>
 
-            <Button type="submit" size="lg" className="w-full h-16 bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 border-2 border-red-800 glow-red-strong animate-pulse-glow btn-glow-red">
-              <Lock className="w-5 h-5 mr-3" />
-              <span className="font-cinzel tracking-widest uppercase text-sm">Place Order — {formatPrice(grandTotal)}</span>
+            <Button type="submit" disabled={placing} size="lg" className="w-full h-16 bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 border-2 border-red-800 glow-red-strong animate-pulse-glow btn-glow-red disabled:opacity-70">
+              {placing ? (
+                <><Loader2 className="w-5 h-5 mr-3 animate-spin" /><span className="font-cinzel tracking-widest uppercase text-sm">Redirecting to Shopify…</span></>
+              ) : (
+                <><Lock className="w-5 h-5 mr-3" /><span className="font-cinzel tracking-widest uppercase text-sm">Place Order — {formatPrice(grandTotal)}</span></>
+              )}
             </Button>
           </form>
 

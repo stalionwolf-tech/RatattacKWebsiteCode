@@ -123,8 +123,8 @@ export function Footer() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-xs text-neutral-500 order-2 md:order-1">{SITE_CONFIG.website.copyright}</p>
             <div className="flex items-center gap-6 order-1 md:order-2">
-              <Link href="#privacy" className="text-xs text-neutral-500 hover:text-red-400 transition-colors">Privacy Policy</Link>
-              <Link href="#terms" className="text-xs text-neutral-500 hover:text-red-400 transition-colors">Terms of Service</Link>
+              <Link href="/privacy" className="text-xs text-neutral-500 hover:text-red-400 transition-colors">Privacy Policy</Link>
+              <Link href="/terms" className="text-xs text-neutral-500 hover:text-red-400 transition-colors">Terms of Service</Link>
               <div className="hidden md:block text-xs text-neutral-700 font-cinzel tracking-[0.3em] uppercase">✦ Forged in Darkness ✦</div>
             </div>
           </div>

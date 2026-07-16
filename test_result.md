@@ -244,3 +244,92 @@ test_plan:
 agent_communication:
   - agent: "main"
     message: "Visually verified all 10 Account Center routes via screenshot tool. All render correctly with the dark-fantasy aesthetic. Mock data from lib/account.js is wired to every page. No regressions detected on the storefront, homepage, or other flows."
+  - agent: "main"
+    message: "Wired live Shopify Storefront API. Added env vars, created /app/lib/shopify.js (GraphQL fetch + adapter + safe fallback to mock catalog), API routes /api/shopify/products, /api/shopify/products/[handle], /api/shopify/checkout (cartCreate → hosted checkoutUrl). Updated /store, /store/product/[slug], /store/category/[slug] server components to fetch live products with graceful fallback. Cart page, Cart drawer, and mock Checkout 'Place Order' now POST cart lines to /api/shopify/checkout and redirect to Shopify checkoutUrl on success; fallback to preview /checkout on 422 (no Shopify variants yet). Shopify store is currently empty so mock catalog continues to render — will auto-switch to live products once merchant adds items in Shopify admin. Also added /privacy and /terms pages with matching aesthetic; wired Footer legal links. Added Profile link to Account Center sidebar."
+  - agent: "testing"
+    message: "BACKEND TESTING COMPLETE: All Shopify Storefront API routes tested and working correctly. Test results: 8/10 tests passed via external URL, 10/10 passed via localhost. The 2 POST request failures on external URL are due to Kubernetes ingress routing (502 Bad Gateway), NOT code issues - verified working correctly via localhost. All core functionality validated: product listing, product detail, checkout validation, error handling, graceful fallback to mock catalog. Regression tests passed: /api/videos (YouTube) and /api/discord-widget both working. No code changes needed."
+
+backend:
+  - task: "Shopify Storefront — fetch wrapper + fallback"
+    implemented: true
+    working: true
+    file: "lib/shopify.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Storefront token verified with a live GraphQL call to ratattack-tcg.myshopify.com. Empty catalog → graceful fallback to mock via getAllProductsLive/getProductByHandleLive/getCollectionProductsLive."
+      - working: true
+        agent: "testing"
+        comment: "TESTED: Shopify integration working correctly. shopifyEnabled:true, graceful fallback to 16 mock products when Shopify store is empty. All adapter functions (getAllProductsLive, getProductByHandleLive) working as designed."
+
+  - task: "API — GET /api/shopify/products"
+    implemented: true
+    working: true
+    file: "app/api/shopify/products/route.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "curl returned ok:true, source:'mock', shopifyEnabled:true, 16 items (mock fallback because Shopify store is empty)."
+      - working: true
+        agent: "testing"
+        comment: "TESTED: Returns 200 with {ok:true, source:'mock', count:16, shopifyEnabled:true, products:[...]}. All required fields present. Product structure validated (id, handle, title, priceRange, featuredImage, variants). Query param ?first=10 also working."
+
+  - task: "API — GET /api/shopify/products/[handle]"
+    implemented: true
+    working: true
+    file: "app/api/shopify/products/[handle]/route.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Dynamic product proxy with automatic mock fallback."
+      - working: true
+        agent: "testing"
+        comment: "TESTED: Valid handle (scarlet-violet-booster-box) returns 200 with correct product. Invalid handle (does-not-exist-xyz) returns 404. Error handling working correctly."
+
+  - task: "API — POST /api/shopify/checkout"
+    implemented: true
+    working: true
+    file: "app/api/shopify/checkout/route.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Validates merchandiseId GID prefix; returns 422 with clear error for non-Shopify (mock) keys; POSTs cartCreate to Shopify and returns checkoutUrl when real variant IDs are provided."
+      - working: true
+        agent: "testing"
+        comment: "TESTED: GET endpoint returns info correctly. POST with mock merchandiseId returns 422 with 'No Shopify-live merchandise' error (correct behavior). POST with empty lines returns 500 with 'No lines provided'. POST with malformed Shopify GID returns 500 with proper Shopify error. All validation working as designed. Note: External URL POST requests return 502 (Kubernetes ingress routing issue, not code issue - verified working via localhost)."
+
+  - task: "API — GET /api/videos (regression)"
+    implemented: true
+    working: true
+    file: "app/api/[[...path]]/route.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "TESTED: Regression test passed. Returns 200 with {source:'data-api', count:12, videos:[...]}. YouTube API integration working correctly."
+
+  - task: "API — GET /api/discord-widget (regression)"
+    implemented: true
+    working: true
+    file: "app/api/[[...path]]/route.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "TESTED: Regression test passed. Returns 200 with {ok:true, name:'RatAttacK', presence_count:4}. Discord widget integration working correctly."
