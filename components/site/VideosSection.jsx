@@ -5,7 +5,7 @@ import { Play, Eye, Clock, Youtube, Loader2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { SectionHeader } from './SectionHeader';
-import { YOUTUBE_CHANNEL_URL } from '@/lib/constants';
+import { SITE_CONFIG } from '@/lib/config';
 
 function formatTimeAgo(iso) {
   if (!iso) return '';
@@ -171,7 +171,7 @@ export function VideosSection() {
               <span className="text-neutral-500 text-sm">Head to the channel in the meantime.</span>
             </p>
             <Button asChild className="bg-red-700 hover:bg-red-600 border border-red-900">
-              <a href={YOUTUBE_CHANNEL_URL} target="_blank" rel="noopener noreferrer">
+              <a href={SITE_CONFIG.youtube} target="_blank" rel="noopener noreferrer">
                 <Youtube className="w-4 h-4 mr-2" /> Visit YouTube Channel
               </a>
             </Button>
@@ -196,7 +196,7 @@ export function VideosSection() {
             size="lg"
             className="btn-glow-red bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 h-12 px-8 border border-red-900 glow-red"
           >
-            <a href={YOUTUBE_CHANNEL_URL} target="_blank" rel="noopener noreferrer">
+            <a href={SITE_CONFIG.youtube} target="_blank" rel="noopener noreferrer">
               <Youtube className="w-5 h-5 mr-2" /> Subscribe on YouTube
             </a>
           </Button>

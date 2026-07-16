@@ -2,15 +2,18 @@
 import { motion } from 'framer-motion';
 import { Youtube, MessageCircle, Twitch, Twitter, Instagram, Github } from 'lucide-react';
 import { Logo } from './Logo';
+import { SITE_CONFIG } from '@/lib/config';
 
-const SOCIALS = [
-  { icon: Youtube, href: 'https://www.youtube.com/channel/UCro3AjNRHR1Jbd-P2IVztFA?sub_confirmation=1', label: 'YouTube', color: 'hover:text-red-500' },
-  { icon: MessageCircle, href: 'https://discord.gg/ratattack', label: 'Discord', color: 'hover:text-indigo-400' },
-  { icon: Twitch, href: 'https://twitch.tv/RatAttacK', label: 'Twitch', color: 'hover:text-purple-400' },
-  { icon: Twitter, href: 'https://twitter.com/RatAttacK', label: 'Twitter', color: 'hover:text-sky-400' },
-  { icon: Instagram, href: 'https://instagram.com/RatAttacK', label: 'Instagram', color: 'hover:text-pink-400' },
-  { icon: Github, href: 'https://github.com/', label: 'GitHub', color: 'hover:text-white' },
+// Only render socials that have a URL configured — future-proof.
+const ALL_SOCIALS = [
+  { icon: Youtube, href: SITE_CONFIG.youtube, label: 'YouTube', color: 'hover:text-red-500' },
+  { icon: MessageCircle, href: SITE_CONFIG.discord, label: 'Discord', color: 'hover:text-indigo-400' },
+  { icon: Twitch, href: SITE_CONFIG.twitch, label: 'Twitch', color: 'hover:text-purple-400' },
+  { icon: Twitter, href: SITE_CONFIG.twitter, label: 'Twitter', color: 'hover:text-sky-400' },
+  { icon: Instagram, href: SITE_CONFIG.instagram, label: 'Instagram', color: 'hover:text-pink-400' },
+  { icon: Github, href: SITE_CONFIG.github, label: 'GitHub', color: 'hover:text-white' },
 ];
+const SOCIALS = ALL_SOCIALS.filter((s) => !!s.href);
 
 const FOOTER_LINKS = {
   Explore: [
@@ -23,8 +26,8 @@ const FOOTER_LINKS = {
     { label: 'Merch', href: '#merch' },
   ],
   Connect: [
-    { label: 'Discord', href: 'https://discord.gg/ratattack' },
-    { label: 'YouTube', href: 'https://www.youtube.com/channel/UCro3AjNRHR1Jbd-P2IVztFA?sub_confirmation=1' },
+    { label: 'Discord', href: SITE_CONFIG.discord },
+    { label: 'YouTube', href: SITE_CONFIG.youtube },
     { label: 'Contact', href: '#contact' },
   ],
 };
@@ -73,18 +76,21 @@ export function Footer() {
             <div key={title}>
               <h4 className="font-cinzel text-sm uppercase tracking-widest text-red-500 mb-4">{title}</h4>
               <ul className="space-y-2">
-                {links.map((l) => (
-                  <li key={l.label}>
-                    <a
-                      href={l.href}
-                      target={l.href.startsWith('http') ? '_blank' : undefined}
-                      rel={l.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                      className="text-neutral-400 hover:text-red-400 text-sm transition-colors"
-                    >
-                      {l.label}
-                    </a>
-                  </li>
-                ))}
+                {links.filter((l) => !!l.href).map((l) => {
+                  const external = l.href.startsWith('http');
+                  return (
+                    <li key={l.label}>
+                      <a
+                        href={l.href}
+                        target={external ? '_blank' : undefined}
+                        rel={external ? 'noopener noreferrer' : undefined}
+                        className="text-neutral-400 hover:text-red-400 text-sm transition-colors"
+                      >
+                        {l.label}
+                      </a>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ))}

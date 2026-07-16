@@ -4,7 +4,7 @@ import { MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SectionHeader } from './SectionHeader';
 import { IconHorde, IconBolt, IconShield } from './MedievalIcons';
-import { DISCORD_URL } from '@/lib/constants';
+import { SITE_CONFIG } from '@/lib/config';
 
 const PERKS = [
   { Icon: IconHorde, label: 'Active Community' },
@@ -62,7 +62,7 @@ export function CommunitySection() {
                 size="lg"
                 className="btn-glow-red bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 h-14 px-10 border border-red-900 glow-red animate-pulse-glow transition-premium"
               >
-                <a href={DISCORD_URL} target="_blank" rel="noopener noreferrer">
+                <a href={SITE_CONFIG.discord} target="_blank" rel="noopener noreferrer">
                   <MessageCircle className="w-5 h-5 mr-3" />
                   <span className="font-cinzel tracking-widest uppercase text-sm">Join the Discord</span>
                 </a>

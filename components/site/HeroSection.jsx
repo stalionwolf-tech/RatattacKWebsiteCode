@@ -4,7 +4,7 @@ import { useRef } from 'react';
 import { MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { IconPlay, IconChevronDown } from './MedievalIcons';
-import { YOUTUBE_CHANNEL_URL, DISCORD_URL } from '@/lib/constants';
+import { SITE_CONFIG } from '@/lib/config';
 
 export function HeroSection() {
   const ref = useRef(null);
@@ -154,7 +154,7 @@ export function HeroSection() {
             size="lg"
             className="btn-glow-red group h-16 px-10 text-base bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 border-2 border-red-800 text-white glow-red-strong animate-pulse-glow relative overflow-hidden"
           >
-            <a href={YOUTUBE_CHANNEL_URL} target="_blank" rel="noopener noreferrer">
+            <a href={SITE_CONFIG.youtube} target="_blank" rel="noopener noreferrer">
               <span className="mr-3 group-hover:scale-125 transition-transform"><IconPlay size={22} /></span>
               <span className="font-cinzel tracking-widest uppercase text-sm">Watch on YouTube</span>
             </a>
@@ -165,7 +165,7 @@ export function HeroSection() {
             variant="outline"
             className="btn-glow-red group h-16 px-10 text-base bg-black/50 border-2 border-red-800/60 hover:bg-red-950/60 hover:border-red-500 text-white backdrop-blur-md relative"
           >
-            <a href={DISCORD_URL} target="_blank" rel="noopener noreferrer">
+            <a href={SITE_CONFIG.discord} target="_blank" rel="noopener noreferrer">
               <MessageCircle className="w-5 h-5 mr-3 group-hover:scale-125 transition-transform" />
               <span className="font-cinzel tracking-widest uppercase text-sm">Join the Discord</span>
             </a>

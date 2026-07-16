@@ -5,7 +5,7 @@ import { Youtube } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Logo } from './Logo';
 import { IconMenu, IconClose } from './MedievalIcons';
-import { YOUTUBE_CHANNEL_URL } from '@/lib/constants';
+import { SITE_CONFIG } from '@/lib/config';
 
 const NAV_LINKS = [
   { href: '#videos', label: 'Videos' },
@@ -62,7 +62,7 @@ export function Navbar() {
               asChild
               className="bg-red-700 hover:bg-red-600 text-white border border-red-900 btn-glow-red animate-pulse-glow"
             >
-              <a href={YOUTUBE_CHANNEL_URL} target="_blank" rel="noopener noreferrer">
+              <a href={SITE_CONFIG.youtube} target="_blank" rel="noopener noreferrer">
                 <Youtube className="w-4 h-4 mr-2" /> Subscribe
               </a>
             </Button>
@@ -99,7 +99,7 @@ export function Navbar() {
                 </a>
               ))}
               <Button asChild className="bg-red-700 hover:bg-red-600 w-full mt-2">
-                <a href={YOUTUBE_CHANNEL_URL} target="_blank" rel="noopener noreferrer">
+                <a href={SITE_CONFIG.youtube} target="_blank" rel="noopener noreferrer">
                   <Youtube className="w-4 h-4 mr-2" /> Subscribe on YouTube
                 </a>
               </Button>
