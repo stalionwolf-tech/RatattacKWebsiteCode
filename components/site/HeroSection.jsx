@@ -4,7 +4,7 @@ import { useRef } from 'react';
 import { MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { IconPlay, IconChevronDown } from './MedievalIcons';
-import { SITE_CONFIG } from '@/lib/config';
+import { SITE_CONFIG, DISCORD_INVITE_URL } from '@/lib/config';
 
 export function HeroSection() {
   const ref = useRef(null);
@@ -165,7 +165,7 @@ export function HeroSection() {
             variant="outline"
             className="btn-glow-red group h-16 px-10 text-base bg-black/50 border-2 border-red-800/60 hover:bg-red-950/60 hover:border-red-500 text-white backdrop-blur-md relative"
           >
-            <a href={SITE_CONFIG.discord} target="_blank" rel="noopener noreferrer">
+            <a href={DISCORD_INVITE_URL} target="_blank" rel="noopener noreferrer">
               <MessageCircle className="w-5 h-5 mr-3 group-hover:scale-125 transition-transform" />
               <span className="font-cinzel tracking-widest uppercase text-sm">Join the Discord</span>
             </a>

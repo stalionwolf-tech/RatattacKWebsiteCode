@@ -5,7 +5,7 @@ import { Footer } from '@/components/site/Footer';
 import { ScrollingBackdrop } from '@/components/site/ScrollingBackdrop';
 import { AtmosphereBackground } from '@/components/site/AtmosphereBackground';
 import { FilmGrain, Scanlines } from '@/components/site/CinematicFX';
-import { SITE_CONFIG } from '@/lib/config';
+import { SITE_CONFIG, DISCORD_INVITE_URL } from '@/lib/config';
 
 export const metadata = {
   title: 'Privacy Policy — RatAttacK',
@@ -21,7 +21,7 @@ const SECTIONS = [
   { id: 'your-rights', icon: Shield, title: 'Your rights', body: `Depending on your jurisdiction (GDPR, CCPA, etc.), you have the right to access, correct, export, or delete your personal data. To exercise any of these rights, email us at ${SITE_CONFIG.email?.support || 'support@ratattack.gg'} and we will respond within 30 days.` },
   { id: 'children', icon: Shield, title: "Children's data", body: `RatAttacK is not directed at children under 13. We do not knowingly collect data from anyone under 13. If you believe a child has provided us data, contact us and we will delete it.` },
   { id: 'changes', icon: Shield, title: 'Changes to this policy', body: `We may update this policy from time to time. Material changes will be posted here with an updated “Last revised” date. Continued use of the site after changes constitutes acceptance.` },
-  { id: 'contact', icon: Mail, title: 'Contact', body: `Questions? Reach the RatAttacK Order at ${SITE_CONFIG.email?.support || 'support@ratattack.gg'} or via our Discord: ${SITE_CONFIG.social?.discord || 'discord.gg/ratattack'}.` },
+  { id: 'contact', icon: Mail, title: 'Contact', body: `Questions? Reach the RatAttacK Order at ${SITE_CONFIG.email?.support || 'support@ratattack.gg'} or via our Discord: ${DISCORD_INVITE_URL}.` },
 ];
 
 export default function PrivacyPage() {

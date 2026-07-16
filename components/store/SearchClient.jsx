@@ -6,6 +6,7 @@ import { Search as SearchIcon, X, Sparkles } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { ProductCard } from '@/components/store/ProductCard';
 import { EmptyStore } from '@/components/store/EmptyStore';
+import { DISCORD_INVITE_URL } from '@/lib/config';
 
 export function SearchClient({ initialQuery = '', allProducts = [] }) {
   const router = useRouter();
@@ -86,8 +87,8 @@ export function SearchClient({ initialQuery = '', allProducts = [] }) {
             title="Nothing Found in the Archives"
             message={`Nothing matched “${q}”. Try a different set, product type, or browse the collections.`}
             ctas={[
-              { href: '/store',    label: 'Browse Store',  variant: 'primary' },
-              { href: '/#contact', label: 'Ask the Order', variant: 'ghost' },
+              { href: '/store',           label: 'Browse Store',  variant: 'primary' },
+              { href: DISCORD_INVITE_URL, label: 'Join Discord',  variant: 'ghost', external: true },
             ]}
           />
         )

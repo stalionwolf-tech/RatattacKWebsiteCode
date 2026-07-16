@@ -9,6 +9,7 @@ import { CategoryClient } from '@/components/store/CategoryClient';
 import { EmptyStore } from '@/components/store/EmptyStore';
 import { getCollectionProductsLive } from '@/lib/shopify';
 import { getCollectionMetaLive } from '@/lib/shopify-extras';
+import { DISCORD_INVITE_URL } from '@/lib/config';
 import { Toaster } from '@/components/ui/sonner';
 
 export const dynamic = 'force-dynamic';
@@ -51,8 +52,8 @@ export default async function CategoryPage({ params }) {
               title="Nothing In This Chamber Yet"
               message={`No products are currently listed in the ${collection.title} collection. Check back soon — items are added as raids conclude.`}
               ctas={[
-                { href: '/store',      label: 'Back to Store', variant: 'primary' },
-                { href: '/#community', label: 'Join Discord',  variant: 'ghost' },
+                { href: '/store',           label: 'Back to Store', variant: 'primary' },
+                { href: DISCORD_INVITE_URL, label: 'Join Discord',  variant: 'ghost', external: true },
               ]}
             />
           </div>

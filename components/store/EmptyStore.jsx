@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { PackageOpen, Sparkles, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { DISCORD_INVITE_URL } from '@/lib/config';
 
 /**
  * Shown whenever a Shopify query returns zero products.
@@ -14,8 +15,8 @@ export function EmptyStore({
   eyebrow = 'Coming Soon',
   message = 'Sealed product, singles, and merch are being catalogued as we speak. Return shortly, or join the horde to be notified the moment the vault opens.',
   ctas = [
-    { href: '/#community',  label: 'Join Discord',        variant: 'primary' },
-    { href: '/videos',      label: 'Watch on YouTube',    variant: 'ghost' },
+    { href: DISCORD_INVITE_URL, label: 'Join Discord',     variant: 'primary', external: true },
+    { href: '/store',           label: 'Browse Store',     variant: 'ghost' },
   ],
   showIcon = true,
 }) {
@@ -45,21 +46,26 @@ export function EmptyStore({
         <p className="text-neutral-400 leading-relaxed max-w-lg mx-auto mb-8">{message}</p>
 
         <div className="flex flex-wrap items-center justify-center gap-3">
-          {ctas.map((c) => (
-            c.variant === 'primary' ? (
-              <Button asChild key={c.href + c.label} className="h-12 px-6 bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 border border-red-900 btn-glow-red glow-red">
-                <Link href={c.href}>
-                  <span className="font-cinzel tracking-widest uppercase text-xs">{c.label}</span>
-                </Link>
+          {ctas.map((c) => {
+            const isExternal = !!c.external || /^https?:\/\//.test(c.href || '');
+            const btnCls = c.variant === 'primary'
+              ? 'h-12 px-6 bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 border border-red-900 btn-glow-red glow-red'
+              : 'h-12 px-6 border-red-800/60 bg-black/40 hover:bg-red-950/40 hover:border-red-600 text-neutral-200';
+            const variant = c.variant === 'primary' ? undefined : 'outline';
+            const content = <span className="font-cinzel tracking-widest uppercase text-xs">{c.label}</span>;
+            if (isExternal) {
+              return (
+                <Button asChild variant={variant} key={c.href + c.label} className={btnCls}>
+                  <a href={c.href} target="_blank" rel="noopener noreferrer">{content}</a>
+                </Button>
+              );
+            }
+            return (
+              <Button asChild variant={variant} key={c.href + c.label} className={btnCls}>
+                <Link href={c.href}>{content}</Link>
               </Button>
-            ) : (
-              <Button asChild variant="outline" key={c.href + c.label} className="h-12 px-6 border-red-800/60 bg-black/40 hover:bg-red-950/40 hover:border-red-600 text-neutral-200">
-                <Link href={c.href}>
-                  <span className="font-cinzel tracking-widest uppercase text-xs">{c.label}</span>
-                </Link>
-              </Button>
-            )
-          ))}
+            );
+          })}
         </div>
 
         <p className="mt-8 text-[10px] uppercase tracking-[0.3em] text-neutral-500 font-cinzel inline-flex items-center gap-2">

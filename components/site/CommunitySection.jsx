@@ -5,7 +5,7 @@ import { MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SectionHeader } from './SectionHeader';
 import { IconShield, IconChalice, IconSwords, IconRaven } from './MedievalIcons';
-import { SITE_CONFIG } from '@/lib/config';
+import { SITE_CONFIG, DISCORD_INVITE_URL } from '@/lib/config';
 
 const FEATURES = [
   {
@@ -55,7 +55,7 @@ function useDiscordWidget() {
 
 export function CommunitySection() {
   const widget = useDiscordWidget();
-  const inviteUrl = widget.invite || SITE_CONFIG.discord;
+  const inviteUrl = widget.invite || DISCORD_INVITE_URL;
   const online = widget.ok && widget.presence != null ? String(widget.presence) : '--';
 
   return (

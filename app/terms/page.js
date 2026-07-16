@@ -5,7 +5,7 @@ import { Footer } from '@/components/site/Footer';
 import { ScrollingBackdrop } from '@/components/site/ScrollingBackdrop';
 import { AtmosphereBackground } from '@/components/site/AtmosphereBackground';
 import { FilmGrain, Scanlines } from '@/components/site/CinematicFX';
-import { SITE_CONFIG } from '@/lib/config';
+import { SITE_CONFIG, DISCORD_INVITE_URL } from '@/lib/config';
 
 export const metadata = {
   title: 'Terms of Service — RatAttacK',
@@ -21,7 +21,7 @@ const SECTIONS = [
   { id: 'community',     icon: ShieldAlert,  title: 'Community conduct',    body: `Discord and YouTube behavior is governed by the RatAttacK Community Code and each platform’s ToS. Harassment, hate speech, doxxing, and illegal content result in immediate ban across all RatAttacK properties.` },
   { id: 'liability',     icon: Ban,          title: 'Liability',            body: `The site and storefront are provided “as is” without warranties of any kind beyond those required by law. RatAttacK’s maximum liability for any claim related to a purchase is limited to the amount paid for that specific order.` },
   { id: 'law',           icon: Gavel,        title: 'Governing law',        body: `These terms are governed by the laws of the United States and, where applicable, the state in which RatAttacK is incorporated. Disputes will be resolved by binding arbitration where permitted by law. If any clause is found unenforceable, the remainder stays in effect.` },
-  { id: 'contact',       icon: Mail,         title: 'Contact',              body: `Legal questions? Email ${SITE_CONFIG.email?.support || 'support@ratattack.gg'}. General questions? Join the Discord: ${SITE_CONFIG.social?.discord || 'discord.gg/ratattack'}.` },
+  { id: 'contact',       icon: Mail,         title: 'Contact',              body: `Legal questions? Email ${SITE_CONFIG.email?.support || 'support@ratattack.gg'}. General questions? Join the Discord: ${DISCORD_INVITE_URL}.` },
 ];
 
 export default function TermsPage() {

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Youtube, MessageCircle, Twitch, Twitter, Instagram, Github, Mail, ArrowUp } from 'lucide-react';
 import Link from 'next/link';
 import { Logo } from './Logo';
-import { SITE_CONFIG } from '@/lib/config';
+import { SITE_CONFIG, DISCORD_INVITE_URL } from '@/lib/config';
 
 const TiktokIcon = ({ className = '' }) => (
   <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
@@ -13,7 +13,7 @@ const TiktokIcon = ({ className = '' }) => (
 
 const ALL_SOCIALS = [
   { Icon: Youtube,       href: SITE_CONFIG.social.youtube,   label: 'YouTube',   color: 'hover:text-red-500' },
-  { Icon: MessageCircle, href: SITE_CONFIG.social.discord,   label: 'Discord',   color: 'hover:text-indigo-400' },
+  { Icon: MessageCircle, href: DISCORD_INVITE_URL,             label: 'Discord',   color: 'hover:text-indigo-400' },
   { Icon: Twitch,        href: SITE_CONFIG.social.twitch,    label: 'Twitch',    color: 'hover:text-purple-400' },
   { Icon: Twitter,       href: SITE_CONFIG.social.twitter,   label: 'Twitter',   color: 'hover:text-sky-400' },
   { Icon: Instagram,     href: SITE_CONFIG.social.instagram, label: 'Instagram', color: 'hover:text-pink-400' },
@@ -42,7 +42,7 @@ const HELP_LINKS = [
 
 const CONNECT_LINKS = [
   { label: 'YouTube', href: SITE_CONFIG.social.youtube, external: true },
-  { label: 'Discord', href: SITE_CONFIG.social.discord, external: true },
+  { label: 'Discord', href: DISCORD_INVITE_URL,             external: true },
   { label: 'Email',   href: `mailto:${SITE_CONFIG.email.contact}`, external: false },
 ];
 
