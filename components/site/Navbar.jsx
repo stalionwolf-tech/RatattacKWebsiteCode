@@ -2,7 +2,7 @@
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Youtube, User, LogOut, LayoutDashboard, Package, Heart } from 'lucide-react';
+import { Youtube, User, LogOut, LayoutDashboard, Package, Heart, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Logo } from './Logo';
 import { IconMenu, IconClose } from './MedievalIcons';
@@ -126,6 +126,9 @@ export function Navbar() {
           </nav>
 
           <div className="hidden lg:flex items-center gap-3">
+            <Link href="/search" aria-label="Search" className="inline-flex items-center justify-center w-10 h-10 rounded-full border border-red-900/60 bg-black/40 hover:bg-red-950/40 hover:border-red-700 text-neutral-300 hover:text-white transition-colors">
+              <Search className="w-4 h-4" />
+            </Link>
             {!loading && (
               user ? (
                 <AccountMenu />
@@ -175,6 +178,9 @@ export function Navbar() {
                   {link.label}
                 </a>
               ))}
+              <Link href="/search" onClick={() => setOpen(false)} className="text-neutral-200 hover:text-red-500 font-medium py-2 border-b border-neutral-900 flex items-center gap-2">
+                <Search className="w-4 h-4" /> Search
+              </Link>
               {!loading && (
                 user ? (
                   <Link href="/account" onClick={() => setOpen(false)} className="text-neutral-200 hover:text-red-500 font-medium py-2 border-b border-neutral-900 flex items-center gap-2">

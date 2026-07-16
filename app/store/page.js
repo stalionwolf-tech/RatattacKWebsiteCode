@@ -9,6 +9,7 @@ import { EmptyStore } from '@/components/store/EmptyStore';
 import { COLLECTIONS, CURRENT_PROMOS } from '@/lib/products';
 import { getAllProductsLive } from '@/lib/shopify';
 import { Toaster } from '@/components/ui/sonner';
+import { RecentlyViewed } from '@/components/store/RecentlyViewed';
 
 export const dynamic = 'force-dynamic';
 
@@ -55,6 +56,7 @@ export default async function StorePage() {
             promos={CURRENT_PROMOS}
           />
         )}
+        <RecentlyViewed />
       </main>
 
       <Footer />

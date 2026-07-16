@@ -1,49 +1,64 @@
 'use client';
-import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { Bell, MessageSquare, ShoppingBag, Sparkles, Monitor, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { useNotificationPrefs } from '@/lib/account-hooks';
+import { useAuth } from '@/components/auth/AuthProvider';
+import { useState } from 'react';
 
-function Toggle({ label, description, defaultChecked = true }) {
+function Toggle({ label, description, icon: Icon, checked, onChange }) {
   return (
-    <label className="flex items-start justify-between gap-4 p-4 rounded-lg border border-neutral-900 bg-black/40 hover:border-red-800 transition-premium cursor-pointer">
-      <div>
-        <div className="font-cinzel text-white text-sm">{label}</div>
-        <div className="text-xs text-neutral-500 mt-1 leading-relaxed">{description}</div>
-      </div>
-      <input type="checkbox" defaultChecked={defaultChecked} className="mt-1 accent-red-600 w-5 h-5" />
+    <label className="flex items-start gap-4 p-4 rounded-lg glass-panel border border-neutral-900 cursor-pointer select-none hover:border-red-800/60 transition-colors">
+      <span className="w-10 h-10 rounded-full bg-red-950/40 border border-red-800 flex items-center justify-center text-red-400 flex-shrink-0"><Icon className="w-4 h-4" /></span>
+      <span className="flex-1">
+        <span className="block font-cinzel text-sm text-white">{label}</span>
+        <span className="block text-xs text-neutral-400 mt-1">{description}</span>
+      </span>
+      <span className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${checked ? 'bg-red-600' : 'bg-neutral-800'}`}>
+        <input type="checkbox" className="sr-only" checked={checked} onChange={(e) => onChange(e.target.checked)} />
+        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${checked ? 'translate-x-6' : 'translate-x-1'}`} />
+      </span>
     </label>
   );
 }
 
 export default function SettingsPage() {
+  const { prefs, update } = useNotificationPrefs();
+  const { user, updateProfile } = useAuth();
+  const [busy, setBusy] = useState(false);
+
+  const set = (k) => (v) => { update({ [k]: v }); toast.success(`Preference updated.`); };
+
+  const saveMarketing = async () => {
+    setBusy(true);
+    try {
+      await updateProfile({ acceptsMarketing: !user?.acceptsMarketing });
+      toast.success('Marketing preference updated.');
+    } catch (err) { toast.error(err?.message || 'Could not update.'); }
+    finally { setBusy(false); }
+  };
+
   return (
     <>
       <section className="glass-panel frame-corners rounded-xl p-6">
-        <h2 className="font-cinzel text-xl text-white mb-5">Notifications</h2>
+        <div className="flex items-center gap-2 mb-5"><Bell className="w-5 h-5 text-red-500" /><h2 className="font-cinzel text-xl text-white">Notifications</h2></div>
         <div className="space-y-3">
-          <Toggle label="Order updates" description="Emails when your order ships and delivers." />
-          <Toggle label="Restock alerts" description="Get pinged when wishlisted items return to stock." />
-          <Toggle label="Community events" description="Announcements about tournaments and giveaways." defaultChecked={false} />
-          <Toggle label="Promotional emails" description="Sale drops and members-only codes." defaultChecked={false} />
+          <Toggle label="Order updates"      description="Shipping, delivery, and refund emails." icon={ShoppingBag}   checked={prefs.orderUpdates}      onChange={set('orderUpdates')} />
+          <Toggle label="Restock alerts"     description="Get pinged when a wishlist product is back in stock." icon={Sparkles} checked={prefs.restockAlerts}     onChange={set('restockAlerts')} />
+          <Toggle label="Community digest"   description="Weekly recap of raids, streams, and Discord highlights." icon={MessageSquare} checked={prefs.communityDigest}  onChange={set('communityDigest')} />
+          <Toggle label="Promotional offers" description="Discount codes and exclusive Rat Horde drops." icon={Bell}              checked={prefs.promotionalOffers} onChange={set('promotionalOffers')} />
+          <Toggle label="Desktop push"       description="Browser push notifications on this device." icon={Monitor}             checked={prefs.desktopPush}       onChange={set('desktopPush')} />
         </div>
       </section>
 
       <section className="glass-panel frame-corners rounded-xl p-6">
-        <h2 className="font-cinzel text-xl text-white mb-5">Security</h2>
-        <div className="space-y-3">
-          <Button onClick={() => toast.info('Password reset link sent to your email.')} variant="outline" className="h-11 border-red-800/60 bg-black/40 hover:bg-red-950/40">
-            <span className="font-cinzel tracking-widest uppercase text-xs">Change Password</span>
-          </Button>
-          <Button onClick={() => toast.info('Two-factor authentication configured.')} variant="outline" className="h-11 border-red-800/60 bg-black/40 hover:bg-red-950/40 ml-3">
-            <span className="font-cinzel tracking-widest uppercase text-xs">Enable 2FA</span>
-          </Button>
-        </div>
-      </section>
-
-      <section className="glass-panel frame-corners rounded-xl p-6">
-        <h2 className="font-cinzel text-xl text-white mb-5">Danger Zone</h2>
-        <p className="text-sm text-neutral-400 mb-4">Deleting your account will remove your order history and saved details permanently.</p>
-        <Button onClick={() => toast.error('Account deletion is disabled in demo mode.')} variant="outline" className="h-11 border-red-800/60 bg-red-950/20 hover:bg-red-950/50 text-red-300">
-          <span className="font-cinzel tracking-widest uppercase text-xs">Delete Account</span>
+        <div className="flex items-center gap-2 mb-3"><Sparkles className="w-5 h-5 text-red-500" /><h2 className="font-cinzel text-xl text-white">Marketing Emails</h2></div>
+        <p className="text-sm text-neutral-400 mb-4">
+          You are {user?.acceptsMarketing ? <span className="text-emerald-400">subscribed</span> : <span className="text-neutral-300">not subscribed</span>} to the RatAttacK newsletter. This preference is mirrored in Shopify.
+        </p>
+        <Button onClick={saveMarketing} disabled={busy} variant="outline" className="h-10 border-red-800/60 bg-black/40 hover:bg-red-950/40 disabled:opacity-70">
+          {busy ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /><span className="font-cinzel tracking-widest uppercase text-[10px]">Saving…</span></> : <span className="font-cinzel tracking-widest uppercase text-[10px]">{user?.acceptsMarketing ? 'Unsubscribe' : 'Subscribe'}</span>}
         </Button>
       </section>
     </>

@@ -31,6 +31,15 @@ const NAV_LINKS = [
   { label: 'Contact',   href: '/#contact' },
 ];
 
+const HELP_LINKS = [
+  { label: 'FAQ',              href: '/faq' },
+  { label: 'Shipping Policy',  href: '/shipping' },
+  { label: 'Return Policy',    href: '/returns' },
+  { label: 'Cookie Policy',    href: '/cookies' },
+  { label: 'Privacy Policy',   href: '/privacy' },
+  { label: 'Terms of Service', href: '/terms' },
+];
+
 const CONNECT_LINKS = [
   { label: 'YouTube', href: SITE_CONFIG.social.youtube, external: true },
   { label: 'Discord', href: SITE_CONFIG.social.discord, external: true },
@@ -72,7 +81,7 @@ export function Footer() {
           <BackToTop />
         </motion.div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-14">
+        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-14">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }} className="lg:col-span-2 space-y-5">
             <Logo size="lg" />
             <p className="text-neutral-400 text-sm md:text-base leading-relaxed max-w-md">
@@ -91,6 +100,20 @@ export function Footer() {
             <h4 className="font-cinzel text-sm uppercase tracking-[0.3em] text-red-500 mb-5">Navigation</h4>
             <ul className="space-y-3">
               {NAV_LINKS.map((l) => (
+                <li key={l.label}>
+                  <Link href={l.href} className="relative inline-block text-neutral-400 hover:text-white text-sm transition-colors group">
+                    <span className="relative z-10">{l.label}</span>
+                    <span className="absolute -bottom-1 left-0 w-0 h-px bg-red-500 group-hover:w-full transition-all duration-500 shadow-[0_0_8px_rgba(220,38,38,0.8)]" />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7, delay: 0.15 }}>
+            <h4 className="font-cinzel text-sm uppercase tracking-[0.3em] text-red-500 mb-5">Help & Legal</h4>
+            <ul className="space-y-3">
+              {HELP_LINKS.map((l) => (
                 <li key={l.label}>
                   <Link href={l.href} className="relative inline-block text-neutral-400 hover:text-white text-sm transition-colors group">
                     <span className="relative z-10">{l.label}</span>

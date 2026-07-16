@@ -8,6 +8,8 @@ import { CartDrawer } from '@/components/store/CartDrawer';
 import { ProductDetail } from '@/components/store/ProductDetail';
 import { getProductByHandleLive, getAllProductsLive } from '@/lib/shopify';
 import { Toaster } from '@/components/ui/sonner';
+import { RecentlyViewed } from '@/components/store/RecentlyViewed';
+import { RecordRecentlyViewed } from '@/components/store/RecordRecentlyViewed';
 
 export const dynamic = 'force-dynamic';
 
@@ -46,7 +48,9 @@ export default async function ProductPage({ params }) {
       <Toaster theme="dark" position="bottom-right" />
 
       <main className="relative z-10">
+        <RecordRecentlyViewed handle={product.handle} />
         <ProductDetail product={product} related={related} reviews={reviews} />
+        <RecentlyViewed excludeHandle={product.handle} />
       </main>
 
       <Footer />
