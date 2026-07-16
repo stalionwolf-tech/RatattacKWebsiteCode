@@ -8,22 +8,43 @@ export const metadata = {
   title: SITE_CONFIG.seo.defaultTitle,
   description: SITE_CONFIG.seo.defaultDescription,
   keywords: SITE_CONFIG.seo.defaultKeywords,
+  manifest: '/site.webmanifest',
+  applicationName: SITE_CONFIG.brand.name,
   icons: {
-    icon: SITE_CONFIG.brand.logoAvatar,
-    shortcut: SITE_CONFIG.brand.logoAvatar,
-    apple: SITE_CONFIG.brand.logoAvatar,
+    // App-Router auto-serves /app/icon.svg and /app/apple-icon.png,
+    // but we declare explicit entries so we can also expose the /public
+    // copies (needed for the webmanifest + Safari mask-icon references).
+    icon: [
+      { url: '/icon.svg',     type: 'image/svg+xml' },
+      { url: '/favicon.svg',  type: 'image/svg+xml' },
+      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    shortcut: '/favicon.svg',
+    apple: [
+      { url: '/apple-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+    other: [
+      { rel: 'mask-icon', url: '/safari-pinned-tab.svg', color: SITE_CONFIG.theme.primary },
+    ],
   },
   openGraph: {
     title: SITE_CONFIG.seo.defaultTitle,
     description: SITE_CONFIG.seo.defaultDescription,
     type: 'website',
     images: [SITE_CONFIG.seo.ogImage],
+    siteName: SITE_CONFIG.brand.name,
   },
   twitter: {
     card: 'summary_large_image',
     title: SITE_CONFIG.brand.name,
     description: SITE_CONFIG.seo.defaultDescription,
     images: [SITE_CONFIG.seo.ogImage],
+  },
+  other: {
+    // Windows tile color (used by pinned start-menu tiles)
+    'msapplication-TileColor': SITE_CONFIG.theme.primary,
+    'msapplication-config':    '/browserconfig.xml',
   },
 };
 
