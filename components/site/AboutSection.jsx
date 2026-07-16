@@ -4,10 +4,10 @@ import { SectionHeader } from './SectionHeader';
 import { IconSwords, IconSkull, IconGhost, IconHorde } from './MedievalIcons';
 
 const STATS = [
-  { Icon: IconSwords, label: 'Extraction Shooters', desc: 'Tarkov, Hunt: Showdown, The Cycle' },
-  { Icon: IconSkull, label: 'Dark Fantasy', desc: 'Dark and Darker, Elden Ring, Diablo' },
-  { Icon: IconGhost, label: 'Survival Games', desc: 'DayZ, Rust, Project Zomboid' },
-  { Icon: IconHorde, label: 'Multiplayer Chaos', desc: 'Squad ops & pure mayhem' },
+  { Icon: IconSwords, label: 'Extraction Shooters', desc: 'Escape from Tarkov · ARC Raiders · Hunt: Showdown · The next great extraction shooter' },
+  { Icon: IconSkull, label: 'Dark Fantasy', desc: 'Dark and Darker · Elden Ring · Soulslikes & RPG Adventures' },
+  { Icon: IconGhost, label: 'Survival Games', desc: 'Rust · DayZ · Project Zomboid · Open-world survival' },
+  { Icon: IconHorde, label: 'Multiplayer Chaos', desc: 'Co-op Disasters · Clutch Moments · Questionable Decisions' },
 ];
 
 export function AboutSection() {
@@ -18,7 +18,7 @@ export function AboutSection() {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(220,38,38,0.08),transparent_60%)]" />
 
       <div className="container mx-auto px-6 relative z-10">
-        <SectionHeader eyebrow="The Legend" title="About RatAttacK" />
+        <SectionHeader eyebrow="Enter the Warren" title="About RatAttacK" />
 
         <div className="grid lg:grid-cols-2 gap-16 items-center max-w-6xl mx-auto">
           <motion.div
@@ -29,18 +29,17 @@ export function AboutSection() {
             className="space-y-6"
           >
             <p className="text-xl md:text-2xl text-neutral-200 leading-relaxed font-light">
-              <span className="font-cinzel text-6xl md:text-7xl text-red-500 float-left leading-none mr-3 mt-1 text-glow">R</span>
-              atAttacK creates <span className="text-red-400 font-medium">funny, high‑quality gaming content</span> forged in the fires of chaos.
+              RatAttacK creates <span className="text-red-400 font-medium">unhinged &amp; adult-rated, story-driven gaming content</span> that blends high-skill gameplay, dark humor, and unforgettable moments. Every video is carefully edited to turn ordinary matches into entertaining stories filled with clutch plays, hilarious failures, and complete chaos.
             </p>
             <p className="text-base md:text-lg text-neutral-400 leading-loose">
-              I dive into the darkest corners of <span className="text-white font-medium">Dark and Darker</span>, hustle for gear in <span className="text-white font-medium">Escape from Tarkov</span>, ambush unsuspecting knights in extraction shooters, scavenge through survival games, and get into unhinged squad ops across every multiplayer arena I can find.
+              Whether I'm diving into the dungeons of <span className="text-white font-medium">Dark and Darker</span>, surviving the brutal world of <span className="text-white font-medium">Escape from Tarkov</span>, exploring the newest extraction shooters, or getting into ridiculous situations with friends, the goal is always the same: create videos that are genuinely fun to watch&mdash;not just gameplay.
             </p>
             <p className="text-base md:text-lg text-neutral-400 leading-loose">
-              Expect cinematic edits, questionable tactics, and belly laughs. Sub in, sharpen your dagger, and join the horde.
+              If you're here for cinematic edits, memorable moments, and a community that doesn't take itself too seriously, welcome to the <span className="text-red-400 font-medium">Rat Horde</span>.
             </p>
 
             <div className="flex flex-wrap gap-2 pt-4">
-              {['Cinematic Edits', 'Funny Moments', 'Solo & Squad', 'Weekly Uploads'].map((tag) => (
+              {['Cinematic Edits', 'High-Skill Gameplay', 'Unhinged Comedy', 'Community Driven'].map((tag) => (
                 <span
                   key={tag}
                   className="px-3.5 py-1.5 text-[11px] uppercase tracking-[0.2em] bg-red-950/40 border border-red-900/60 text-red-300 rounded-full backdrop-blur-sm font-cinzel hover:bg-red-900/50 hover:border-red-700 transition-premium"
