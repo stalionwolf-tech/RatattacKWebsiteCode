@@ -5,7 +5,8 @@ import { AtmosphereBackground } from '@/components/site/AtmosphereBackground';
 import { FilmGrain, Scanlines } from '@/components/site/CinematicFX';
 import { CartDrawer } from '@/components/store/CartDrawer';
 import { StoreHomeClient } from '@/components/store/StoreHomeClient';
-import { COLLECTIONS, CURRENT_PROMOS, getProductsForCollection as mockGetProductsForCollection } from '@/lib/products';
+import { EmptyStore } from '@/components/store/EmptyStore';
+import { COLLECTIONS, CURRENT_PROMOS } from '@/lib/products';
 import { getAllProductsLive } from '@/lib/shopify';
 import { Toaster } from '@/components/ui/sonner';
 
@@ -21,19 +22,13 @@ export default async function StorePage() {
     ['booster-boxes','elite-trainer-boxes','singles','merch','mystery-packs','accessories'].includes(c.slug)
   );
 
-  // Try Shopify first; automatically falls back to mock inventory if empty/error.
-  const { products: livePool, source } = await getAllProductsLive({ first: 50 });
+  // Live Shopify catalog only. No mock fallback anywhere.
+  const { products: pool, empty } = await getAllProductsLive({ first: 50 });
 
-  // When source is 'shopify' we don't know the mock collection slug on each item,
-  // so derive shelves purely by product-type + tags.
-  const featured    = livePool.slice(0, 8);
-  const newArrivals = source === 'shopify'
-    ? livePool.filter((p) => p.isNew).slice(0, 8)
-    : mockGetProductsForCollection('new-arrivals').slice(0, 8);
-  const bestSellers = source === 'shopify'
-    ? [...livePool].sort((a, b) => (b.salesCount ?? 0) - (a.salesCount ?? 0)).slice(0, 8)
-    : mockGetProductsForCollection('best-sellers').slice(0, 8);
-  const recent = [...livePool].sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || '')).slice(0, 8);
+  const featured    = pool.slice(0, 8);
+  const newArrivals = pool.filter((p) => p.isNew).slice(0, 8);
+  const bestSellers = [...pool].sort((a, b) => (b.salesCount ?? 0) - (a.salesCount ?? 0)).slice(0, 8);
+  const recent      = [...pool].sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || '')).slice(0, 8);
 
   return (
     <div className="relative min-h-screen bg-black text-neutral-100 overflow-x-hidden">
@@ -46,14 +41,20 @@ export default async function StorePage() {
       <Toaster theme="dark" position="bottom-right" />
 
       <main className="relative z-10">
-        <StoreHomeClient
-          featuredCollections={featuredCollections}
-          featured={featured}
-          newArrivals={newArrivals}
-          bestSellers={bestSellers}
-          recent={recent}
-          promos={CURRENT_PROMOS}
-        />
+        {empty ? (
+          <div className="pt-24 md:pt-32">
+            <EmptyStore />
+          </div>
+        ) : (
+          <StoreHomeClient
+            featuredCollections={featuredCollections}
+            featured={featured}
+            newArrivals={newArrivals}
+            bestSellers={bestSellers}
+            recent={recent}
+            promos={CURRENT_PROMOS}
+          />
+        )}
       </main>
 
       <Footer />

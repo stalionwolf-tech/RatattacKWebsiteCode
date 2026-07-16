@@ -245,7 +245,19 @@ agent_communication:
   - agent: "main"
     message: "Visually verified all 10 Account Center routes via screenshot tool. All render correctly with the dark-fantasy aesthetic. Mock data from lib/account.js is wired to every page. No regressions detected on the storefront, homepage, or other flows."
   - agent: "main"
-    message: "Wired live Shopify Storefront API. Added env vars, created /app/lib/shopify.js (GraphQL fetch + adapter + safe fallback to mock catalog), API routes /api/shopify/products, /api/shopify/products/[handle], /api/shopify/checkout (cartCreate → hosted checkoutUrl). Updated /store, /store/product/[slug], /store/category/[slug] server components to fetch live products with graceful fallback. Cart page, Cart drawer, and mock Checkout 'Place Order' now POST cart lines to /api/shopify/checkout and redirect to Shopify checkoutUrl on success; fallback to preview /checkout on 422 (no Shopify variants yet). Shopify store is currently empty so mock catalog continues to render — will auto-switch to live products once merchant adds items in Shopify admin. Also added /privacy and /terms pages with matching aesthetic; wired Footer legal links. Added Profile link to Account Center sidebar."
+    message: "Removed all mock product fallbacks from the storefront. Shopify is now the only source of truth. Created /app/components/store/EmptyStore.jsx and wired the store, product detail, category, and homepage featured section to show a cinematic 'The Vault is Being Forged' empty state whenever Shopify returns no products. Also implemented newsletter subscription via Shopify Admin API — new POST /api/newsletter route + subscribeToNewsletter() helper. Idempotent: create customer with SUBSCRIBED consent if new; re-subscribe if existing but unsubscribed; no-op if already subscribed. Frontend newsletter form in StoreHomeClient wired to this route. REQUIRES USER ACTION: Admin token needs write_customers + read_customers scopes enabled on the Shopify custom app (currently ACCESS_DENIED). Once enabled, newsletter subscribers will show up in Shopify Admin → Customers → Email subscribers segment, where user can send campaigns via Shopify Email (free, built-in)."
+
+  - task: "Newsletter — POST /api/newsletter"
+    implemented: true
+    working: false
+    file: "app/api/newsletter/route.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "Route wired and validated (400 on bad email, 400 on missing scope). Endpoint code is correct but Shopify custom app is missing write_customers/read_customers scopes. User must enable these in Shopify Admin → Settings → Apps and sales channels → the headless app → Configuration → API access scopes."
   - agent: "testing"
     message: "BACKEND TESTING COMPLETE: All Shopify Storefront API routes tested and working correctly. Test results: 8/10 tests passed via external URL, 10/10 passed via localhost. The 2 POST request failures on external URL are due to Kubernetes ingress routing (502 Bad Gateway), NOT code issues - verified working correctly via localhost. All core functionality validated: product listing, product detail, checkout validation, error handling, graceful fallback to mock catalog. Regression tests passed: /api/videos (YouTube) and /api/discord-widget both working. No code changes needed."
 

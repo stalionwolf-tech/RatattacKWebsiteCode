@@ -40,9 +40,23 @@ export function StoreHomeClient({ featuredCollections, featured, newArrivals, be
   const subscribe = async (e) => {
     e.preventDefault();
     if (!email.includes('@')) { toast.error('Please enter a valid email.'); return; }
-    // Replace with real endpoint (Klaviyo / Mailchimp / Shopify) later
-    toast.success('Welcome to the Rat Horde. Check your inbox for a rune.');
-    setEmail('');
+    try {
+      const res = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        if (data.alreadySubscribed) toast.info('You’re already in the horde. See you at the drop.');
+        else toast.success('Welcome to the Rat Horde. Check your inbox for a rune.');
+        setEmail('');
+      } else {
+        toast.error(data?.error || 'Subscription failed. Please try again.');
+      }
+    } catch (err) {
+      toast.error(err?.message || 'Network error. Please try again.');
+    }
   };
 
   return (
