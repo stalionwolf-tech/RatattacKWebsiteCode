@@ -60,7 +60,7 @@ export function Navbar() {
               asChild
               className="bg-red-700 hover:bg-red-600 text-white border border-red-900 btn-glow-red animate-pulse-glow"
             >
-              <a href="https://youtube.com/@RatAttacK" target="_blank" rel="noopener noreferrer">
+              <a href="https://www.youtube.com/channel/UCro3AjNRHR1Jbd-P2IVztFA?sub_confirmation=1" target="_blank" rel="noopener noreferrer">
                 <Youtube className="w-4 h-4 mr-2" /> Subscribe
               </a>
             </Button>
@@ -97,7 +97,7 @@ export function Navbar() {
                 </a>
               ))}
               <Button asChild className="bg-red-700 hover:bg-red-600 w-full mt-2">
-                <a href="https://youtube.com/@RatAttacK" target="_blank" rel="noopener noreferrer">
+                <a href="https://www.youtube.com/channel/UCro3AjNRHR1Jbd-P2IVztFA?sub_confirmation=1" target="_blank" rel="noopener noreferrer">
                   <Youtube className="w-4 h-4 mr-2" /> Subscribe on YouTube
                 </a>
               </Button>

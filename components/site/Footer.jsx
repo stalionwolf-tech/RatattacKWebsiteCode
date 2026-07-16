@@ -4,7 +4,7 @@ import { Youtube, MessageCircle, Twitch, Twitter, Instagram, Github } from 'luci
 import { Logo } from './Logo';
 
 const SOCIALS = [
-  { icon: Youtube, href: 'https://youtube.com/@RatAttacK', label: 'YouTube', color: 'hover:text-red-500' },
+  { icon: Youtube, href: 'https://www.youtube.com/channel/UCro3AjNRHR1Jbd-P2IVztFA?sub_confirmation=1', label: 'YouTube', color: 'hover:text-red-500' },
   { icon: MessageCircle, href: 'https://discord.gg/ratattack', label: 'Discord', color: 'hover:text-indigo-400' },
   { icon: Twitch, href: 'https://twitch.tv/RatAttacK', label: 'Twitch', color: 'hover:text-purple-400' },
   { icon: Twitter, href: 'https://twitter.com/RatAttacK', label: 'Twitter', color: 'hover:text-sky-400' },
@@ -24,7 +24,7 @@ const FOOTER_LINKS = {
   ],
   Connect: [
     { label: 'Discord', href: 'https://discord.gg/ratattack' },
-    { label: 'YouTube', href: 'https://youtube.com/@RatAttacK' },
+    { label: 'YouTube', href: 'https://www.youtube.com/channel/UCro3AjNRHR1Jbd-P2IVztFA?sub_confirmation=1' },
     { label: 'Contact', href: '#contact' },
   ],
 };
