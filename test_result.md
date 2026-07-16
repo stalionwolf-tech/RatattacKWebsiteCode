@@ -245,7 +245,68 @@ agent_communication:
   - agent: "main"
     message: "Visually verified all 10 Account Center routes via screenshot tool. All render correctly with the dark-fantasy aesthetic. Mock data from lib/account.js is wired to every page. No regressions detected on the storefront, homepage, or other flows."
   - agent: "main"
-    message: "Removed all mock product fallbacks from the storefront. Shopify is now the only source of truth. Created /app/components/store/EmptyStore.jsx and wired the store, product detail, category, and homepage featured section to show a cinematic 'The Vault is Being Forged' empty state whenever Shopify returns no products. Also implemented newsletter subscription via Shopify Admin API — new POST /api/newsletter route + subscribeToNewsletter() helper. Idempotent: create customer with SUBSCRIBED consent if new; re-subscribe if existing but unsubscribed; no-op if already subscribed. Frontend newsletter form in StoreHomeClient wired to this route. REQUIRES USER ACTION: Admin token needs write_customers + read_customers scopes enabled on the Shopify custom app (currently ACCESS_DENIED). Once enabled, newsletter subscribers will show up in Shopify Admin → Customers → Email subscribers segment, where user can send campaigns via Shopify Email (free, built-in)."
+    message: "Built complete authentication UI + mock provider (no Shopify Customer Accounts wiring per user instruction). Provider is behind an interface at /app/lib/auth so it can hot-swap to Shopify OAuth later without touching UI/routes. Pages: /login, /signup, /forgot-password, /reset-password — all cinematic split-screen. AuthProvider in root layout. AuthGuard protects /account/* — unauthenticated users redirect to /login?next=<path>. Account sidebar now shows real logged-in user (name, initials avatar, rank, points progress) instead of the CUSTOMER mock. Navbar shows Sign In button when logged out and an account dropdown (avatar + Overview/Orders/Wishlist/Sign out) when logged in. Signup form also mirrors email to Shopify newsletter API. Demo/seed user auto-created on first /login load: ratsalot@ratattack.gg / Horde1234! (credentials also in /app/memory/test_credentials.md). Verified end-to-end via screenshot: unauth /account redirect works, demo login lands on personalized /account, sidebar shows correct user."
+
+frontend:
+  - task: "Auth — /login page"
+    implemented: true
+    working: true
+    file: "app/(auth)/login/page.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Cinematic split-screen renders. Demo credentials button auto-fills the seed user. Successful login redirects to next param or /account."
+
+  - task: "Auth — /signup page"
+    implemented: true
+    working: true
+    file: "app/(auth)/signup/page.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "First/Last, email, password with visibility toggle, marketing consent checkbox. Password rules enforced (>=8, letter+digit). Creates user + auto-signs in. Also POSTs to /api/newsletter to mirror email to Shopify."
+
+  - task: "Auth — /forgot-password + /reset-password"
+    implemented: true
+    working: true
+    file: "app/(auth)/forgot-password/page.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Requesting reset surfaces the reset token inline (amber dev-only panel) since there's no email provider in the mock. /reset-password?token= accepts + new password."
+
+  - task: "AuthGuard protects /account/*"
+    implemented: true
+    working: true
+    file: "components/auth/AuthGuard.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Verified: visiting /account while signed out redirected to /login?next=%2Faccount and lands back on /account after login."
+
+  - task: "Navbar — auth state UI"
+    implemented: true
+    working: true
+    file: "components/site/Navbar.jsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Shows 'Sign In' pill when logged out and an avatar dropdown (Overview/Orders/Wishlist/Sign out) when logged in. Mobile menu also swaps between Sign In / My Account."
 
   - task: "Newsletter — POST /api/newsletter"
     implemented: true
