@@ -8,11 +8,11 @@ import { IconMenu, IconClose } from './MedievalIcons';
 import { SITE_CONFIG } from '@/lib/config';
 
 const NAV_LINKS = [
-  { href: '#about', label: 'About' },
-  { href: '#store', label: 'Store' },
-  { href: '#community', label: 'Community' },
-  { href: '#videos', label: 'Videos' },
-  { href: '#contact', label: 'Contact' },
+  { href: '/#about', label: 'About' },
+  { href: '/store', label: 'Store' },
+  { href: '/#community', label: 'Community' },
+  { href: '/#videos', label: 'Videos' },
+  { href: '/#contact', label: 'Contact' },
 ];
 
 export function Navbar() {

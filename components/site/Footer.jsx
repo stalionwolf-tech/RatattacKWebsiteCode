@@ -23,12 +23,12 @@ const ALL_SOCIALS = [
 const SOCIALS = ALL_SOCIALS.filter((s) => !!s.href);
 
 const NAV_LINKS = [
-  { label: 'Home',      href: '#top' },
-  { label: 'Videos',    href: '#videos' },
-  { label: 'Store',     href: '#store' },
-  { label: 'Community', href: '#community' },
-  { label: 'About',     href: '#about' },
-  { label: 'Contact',   href: '#contact' },
+  { label: 'Home',      href: '/#top' },
+  { label: 'Videos',    href: '/#videos' },
+  { label: 'Store',     href: '/store' },
+  { label: 'Community', href: '/#community' },
+  { label: 'About',     href: '/#about' },
+  { label: 'Contact',   href: '/#contact' },
 ];
 
 const CONNECT_LINKS = [
