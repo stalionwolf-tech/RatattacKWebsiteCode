@@ -101,3 +101,146 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: |
+  Build a premium RatAttacK Account Center with pages for profile, orders,
+  order/[id], wishlist, vault, addresses, payment, security, settings. Use
+  mock data shaped for Shopify Customer Accounts. Preserve the existing
+  dark-fantasy premium aesthetic.
+
+frontend:
+  - task: "Account Center — /account overview"
+    implemented: true
+    working: true
+    file: "app/account/page.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Verified via screenshot. Shows stats (orders, wishlist, vault, achievements), current order card, recommended-for-you strip. Sidebar with rank + points progress. Dark fantasy aesthetic preserved."
+
+  - task: "Account Center — /account/orders"
+    implemented: true
+    working: true
+    file: "app/account/orders/page.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Renders 4 mock orders with status pills (DELIVERED, IN_TRANSIT), pricing, tracking numbers, and item thumbnails."
+
+  - task: "Account Center — /account/order/[id]"
+    implemented: true
+    working: true
+    file: "app/account/order/[id]/page.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Dynamic order detail route tested with /account/order/RAT-1042. Shows tracking, line items, subtotal/shipping/total."
+
+  - task: "Account Center — /account/profile"
+    implemented: true
+    working: true
+    file: "app/account/profile/page.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Profile form (first/last name, email, phone) + shipping address section. Save Changes CTA."
+
+  - task: "Account Center — /account/wishlist"
+    implemented: true
+    working: true
+    file: "app/account/wishlist/page.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Empty-state 'Your Reliquary is Empty' with Browse Store CTA. Reads from localStorage."
+
+  - task: "Account Center — /account/vault"
+    implemented: true
+    working: true
+    file: "app/account/vault/page.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Three vault collections (Pull Targets, Singles Wishlist, Merch Drops) with item counts + thumbnails, plus New Collection CTA."
+
+  - task: "Account Center — /account/addresses"
+    implemented: true
+    working: true
+    file: "app/account/addresses/page.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Two mock addresses with default tag, Edit/Set Default/Delete actions, Add Address CTA."
+
+  - task: "Account Center — /account/payment"
+    implemented: true
+    working: true
+    file: "app/account/payment/page.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Two masked cards (Visa 4242 default, Mastercard 8319). Shopify Customer Accounts hand-off note included."
+
+  - task: "Account Center — /account/security"
+    implemented: true
+    working: true
+    file: "app/account/security/page.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Password change, email change, 2FA sections."
+
+  - task: "Account Center — /account/settings"
+    implemented: true
+    working: true
+    file: "app/account/settings/page.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Notification preferences (order updates, restock, community, promo) + security shortcuts."
+
+metadata:
+  created_by: "main_agent"
+  version: "1.1"
+  test_sequence: 1
+  run_ui: false
+
+test_plan:
+  current_focus: []
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: "Visually verified all 10 Account Center routes via screenshot tool. All render correctly with the dark-fantasy aesthetic. Mock data from lib/account.js is wired to every page. No regressions detected on the storefront, homepage, or other flows."
