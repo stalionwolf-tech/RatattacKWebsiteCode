@@ -1,4 +1,5 @@
 'use client';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -12,7 +13,46 @@ const PERKS = [
   { Icon: IconShield, label: 'Loot & Giveaways' },
 ];
 
+// Live Discord widget: presence + instant invite. Polls every 60s.
+function useDiscordWidget() {
+  const [state, setState] = useState({ loading: true, ok: false, presence: null, invite: null });
+
+  useEffect(() => {
+    let alive = true;
+    const load = async () => {
+      try {
+        const r = await fetch('/api/discord-widget', { cache: 'no-store' });
+        const data = await r.json();
+        if (!alive) return;
+        if (data.ok) {
+          setState({ loading: false, ok: true, presence: data.presence_count, invite: data.instant_invite });
+        } else {
+          setState({ loading: false, ok: false, presence: null, invite: null });
+        }
+      } catch {
+        if (alive) setState({ loading: false, ok: false, presence: null, invite: null });
+      }
+    };
+    load();
+    const id = setInterval(load, 60000);
+    return () => { alive = false; clearInterval(id); };
+  }, []);
+
+  return state;
+}
+
 export function CommunitySection() {
+  const widget = useDiscordWidget();
+  const inviteUrl = widget.invite || SITE_CONFIG.discord;
+  const onlineDisplay = widget.ok && widget.presence != null ? String(widget.presence) : '--';
+
+  const stats = [
+    { num: '4.2K', label: 'Members' },
+    { num: onlineDisplay, label: 'Online', live: true },
+    { num: '24/7', label: 'Chatter' },
+    { num: '∞', label: 'Cursed Loot' },
+  ];
+
   return (
     <section id="community" className="relative py-28 md:py-40 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70 pointer-events-none" />
@@ -62,7 +102,7 @@ export function CommunitySection() {
                 size="lg"
                 className="btn-glow-red bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 h-14 px-10 border border-red-900 glow-red animate-pulse-glow transition-premium"
               >
-                <a href={SITE_CONFIG.discord} target="_blank" rel="noopener noreferrer">
+                <a href={inviteUrl} target="_blank" rel="noopener noreferrer">
                   <MessageCircle className="w-5 h-5 mr-3" />
                   <span className="font-cinzel tracking-widest uppercase text-sm">Join the Discord</span>
                 </a>
@@ -70,12 +110,7 @@ export function CommunitySection() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              {[
-                { num: '4.2K', label: 'Members' },
-                { num: '380', label: 'Online' },
-                { num: '24/7', label: 'Chatter' },
-                { num: '∞', label: 'Cursed Loot' },
-              ].map((s, i) => (
+              {stats.map((s, i) => (
                 <motion.div
                   key={s.label}
                   initial={{ opacity: 0, scale: 0.9 }}
@@ -85,8 +120,25 @@ export function CommunitySection() {
                   whileHover={{ scale: 1.05 }}
                   className="text-center p-6 rounded-lg border border-red-900/40 bg-black/50 backdrop-blur-sm hover:border-red-700 transition-premium"
                 >
-                  <div className="font-cinzel text-3xl md:text-5xl font-black text-white text-glow mb-2 leading-none">{s.num}</div>
-                  <div className="text-[10px] uppercase tracking-[0.3em] text-neutral-500 font-cinzel">{s.label}</div>
+                  <div className="font-cinzel text-3xl md:text-5xl font-black text-white text-glow mb-2 leading-none min-h-[1em] flex items-center justify-center">
+                    {s.live && widget.loading ? (
+                      <span
+                        className="inline-block h-8 md:h-12 w-14 md:w-20 rounded bg-gradient-to-r from-neutral-800 via-neutral-700 to-neutral-800 animate-pulse"
+                        aria-label="Loading online count"
+                      />
+                    ) : (
+                      s.num
+                    )}
+                  </div>
+                  <div className="text-[10px] uppercase tracking-[0.3em] text-neutral-500 font-cinzel flex items-center justify-center gap-1.5">
+                    {s.label}
+                    {s.live && widget.ok && !widget.loading && (
+                      <span className="relative flex h-1.5 w-1.5" aria-label="Live">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75" />
+                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500" />
+                      </span>
+                    )}
+                  </div>
                 </motion.div>
               ))}
             </div>

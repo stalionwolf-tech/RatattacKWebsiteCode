@@ -35,6 +35,28 @@ export async function GET(request, { params }) {
       return cors(NextResponse.json({ status: 'ok', service: 'ratattack-api' }));
     }
 
+    if (route === 'discord-widget') {
+      const GUILD_ID = '1527162295011115088';
+      try {
+        const r = await fetch(`https://discord.com/api/guilds/${GUILD_ID}/widget.json`, {
+          next: { revalidate: 30 },
+          headers: { 'User-Agent': 'RatAttackSite/1.0' },
+        });
+        if (!r.ok) {
+          return cors(NextResponse.json({ ok: false, error: `Discord ${r.status}` }, { status: 200 }));
+        }
+        const data = await r.json();
+        return cors(NextResponse.json({
+          ok: true,
+          name: data.name || '',
+          presence_count: typeof data.presence_count === 'number' ? data.presence_count : null,
+          instant_invite: data.instant_invite || null,
+        }));
+      } catch (e) {
+        return cors(NextResponse.json({ ok: false, error: e.message }, { status: 200 }));
+      }
+    }
+
     if (route === 'videos') {
       const CHANNEL_ID = 'UCro3AjNRHR1Jbd-P2IVztFA';
       const CHANNEL_URL = `https://www.youtube.com/channel/${CHANNEL_ID}?sub_confirmation=1`;
