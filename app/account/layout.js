@@ -4,17 +4,23 @@ import { Footer } from '@/components/site/Footer';
 import { ScrollingBackdrop } from '@/components/site/ScrollingBackdrop';
 import { AtmosphereBackground } from '@/components/site/AtmosphereBackground';
 import { FilmGrain, Scanlines } from '@/components/site/CinematicFX';
-import { User, Package, Heart, MapPin, CreditCard, Settings } from 'lucide-react';
+import { CartDrawer } from '@/components/store/CartDrawer';
+import { User, Package, Heart, Boxes, MapPin, CreditCard, ShieldCheck, Settings } from 'lucide-react';
+import { CUSTOMER } from '@/lib/account';
 
 const LINKS = [
-  { href: '/account',          label: 'Overview',         icon: User },
-  { href: '/account/orders',   label: 'Orders',           icon: Package },
-  { href: '/wishlist',         label: 'Wishlist',         icon: Heart },
-  { href: '/account/profile',  label: 'Profile & Address',icon: MapPin },
-  { href: '/account/settings', label: 'Settings',         icon: Settings },
+  { href: '/account',           label: 'Overview',        icon: User },
+  { href: '/account/orders',    label: 'Orders',          icon: Package },
+  { href: '/account/wishlist',  label: 'Wishlist',        icon: Heart },
+  { href: '/account/vault',     label: 'Vault',           icon: Boxes },
+  { href: '/account/addresses', label: 'Addresses',       icon: MapPin },
+  { href: '/account/payment',   label: 'Payment Methods', icon: CreditCard },
+  { href: '/account/security',  label: 'Security',        icon: ShieldCheck },
+  { href: '/account/settings',  label: 'Settings',        icon: Settings },
 ];
 
 export default function AccountLayout({ children }) {
+  const pctToNextTier = Math.min(100, (CUSTOMER.points / CUSTOMER.nextTierAt) * 100);
   return (
     <div className="relative min-h-screen bg-black text-neutral-100 overflow-x-hidden">
       <ScrollingBackdrop />
@@ -22,6 +28,7 @@ export default function AccountLayout({ children }) {
       <FilmGrain />
       <Scanlines />
       <Navbar />
+      <CartDrawer />
 
       <main className="relative z-10 container mx-auto px-6 pt-32 md:pt-40 pb-20">
         <div className="mb-10">
@@ -31,10 +38,26 @@ export default function AccountLayout({ children }) {
 
         <div className="grid lg:grid-cols-[260px_1fr] gap-8 items-start">
           <aside className="glass-panel frame-corners rounded-xl p-4 lg:sticky lg:top-24">
-            <div className="px-3 py-3 mb-3 border-b border-neutral-900">
-              <div className="font-cinzel text-white">Sir Ratsalot</div>
-              <div className="text-[10px] uppercase tracking-widest text-neutral-500 font-cinzel">ratsalot@ratattack.gg</div>
+            <div className="flex items-center gap-3 px-2 py-3 mb-3 border-b border-neutral-900">
+              <div className="w-12 h-12 rounded-full overflow-hidden ring-2 ring-red-700/70 flex-shrink-0">
+                <img src={CUSTOMER.avatar} alt="" className="w-full h-full object-cover" />
+              </div>
+              <div className="min-w-0">
+                <div className="font-cinzel text-white text-sm truncate">{CUSTOMER.firstName} {CUSTOMER.lastName}</div>
+                <div className="text-[10px] uppercase tracking-widest text-red-500 font-cinzel">{CUSTOMER.hordeRank}</div>
+              </div>
             </div>
+
+            <div className="px-2 mb-4">
+              <div className="flex justify-between text-[10px] uppercase tracking-widest text-neutral-500 font-cinzel mb-1.5">
+                <span>{CUSTOMER.points} pts</span><span>{CUSTOMER.nextTierAt}</span>
+              </div>
+              <div className="h-1.5 rounded-full bg-neutral-900 overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-red-700 via-red-500 to-amber-500" style={{ width: `${pctToNextTier}%` }} />
+              </div>
+              <div className="text-[9px] uppercase tracking-widest text-neutral-500 font-cinzel mt-1.5">Next: {CUSTOMER.nextTier}</div>
+            </div>
+
             <nav className="space-y-1">
               {LINKS.map((l) => (
                 <Link key={l.href} href={l.href} className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-neutral-300 hover:bg-red-950/30 hover:text-white transition-premium">
