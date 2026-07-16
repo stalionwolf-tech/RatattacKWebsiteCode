@@ -39,7 +39,7 @@ export function ContactSection() {
 
   return (
     <section id="contact" className="relative py-28 md:py-40">
-      <div className="absolute inset-0 bg-gradient-to-b from-black via-neutral-950 to-black" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(220,38,38,0.08),transparent_60%)]" />
 
       <div className="container mx-auto px-6 relative z-10">

@@ -13,14 +13,8 @@ const STATS = [
 export function AboutSection() {
   return (
     <section id="about" className="relative py-28 md:py-40 overflow-hidden">
-      <div
-        className="absolute inset-0 bg-cover bg-center opacity-25"
-        style={{
-          backgroundImage:
-            "url('https://images.unsplash.com/photo-1599425556060-4722189c0062?crop=entropy&cs=srgb&fm=jpg&q=85')",
-        }}
-      />
-      <div className="absolute inset-0 bg-gradient-to-b from-black via-black/95 to-black" />
+      {/* Softly darkened so the scrolling pixel-art backdrop shows through */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70 pointer-events-none" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(220,38,38,0.08),transparent_60%)]" />
 
       <div className="container mx-auto px-6 relative z-10">

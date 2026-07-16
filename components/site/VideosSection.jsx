@@ -146,7 +146,7 @@ export function VideosSection() {
 
   return (
     <section id="videos" className="relative py-24 md:py-32">
-      <div className="absolute inset-0 bg-gradient-to-b from-black via-neutral-950 to-black pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70 pointer-events-none" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(220,38,38,0.08),transparent_50%)] pointer-events-none" />
 
       <div className="container mx-auto px-6 relative z-10">

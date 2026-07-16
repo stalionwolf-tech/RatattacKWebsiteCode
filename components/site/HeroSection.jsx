@@ -20,67 +20,10 @@ export function HeroSection() {
       id="top"
       className="relative min-h-[100svh] flex items-center justify-center overflow-hidden pt-20 pb-24"
     >
-      {/* Parallax bg with ken-burns */}
-      <motion.div
-        style={{ y: bgY, scale: bgScale }}
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat will-change-transform"
-      >
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage:
-              "url('https://images.unsplash.com/photo-1657868674989-4061c2d335fb?crop=entropy&cs=srgb&fm=jpg&q=90&w=2400')",
-            filter: 'contrast(1.15) brightness(0.55) saturate(0.9)',
-          }}
-        />
-        {/* Slow drift ken-burns */}
-        <motion.div
-          initial={{ scale: 1.05 }}
-          animate={{ scale: 1.18 }}
-          transition={{ duration: 22, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
-          className="absolute inset-0"
-        />
-      </motion.div>
-
-      {/* God rays SVG */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <motion.svg
-          viewBox="0 0 100 100"
-          preserveAspectRatio="none"
-          className="absolute inset-0 w-full h-full opacity-40"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: [0.25, 0.5, 0.25] }}
-          transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-        >
-          <defs>
-            <linearGradient id="ray" x1="50%" y1="0%" x2="50%" y2="100%">
-              <stop offset="0%" stopColor="#ff5252" stopOpacity="0.5" />
-              <stop offset="100%" stopColor="#ff5252" stopOpacity="0" />
-            </linearGradient>
-          </defs>
-          <polygon points="48,0 52,0 65,100 35,100" fill="url(#ray)" />
-          <polygon points="30,0 34,0 15,100 -5,100" fill="url(#ray)" opacity="0.5" />
-          <polygon points="66,0 70,0 90,100 60,100" fill="url(#ray)" opacity="0.6" />
-        </motion.svg>
-      </div>
-
-      {/* Mist / fog drift */}
-      <motion.div
-        initial={{ x: '-30%' }}
-        animate={{ x: '30%' }}
-        transition={{ duration: 30, repeat: Infinity, repeatType: 'reverse', ease: 'linear' }}
-        className="absolute -bottom-40 -inset-x-20 h-96 opacity-40 pointer-events-none"
-        style={{
-          background:
-            'radial-gradient(ellipse at center, rgba(220,38,38,0.15), transparent 60%), radial-gradient(ellipse at 30% 60%, rgba(100,100,120,0.15), transparent 60%)',
-          filter: 'blur(40px)',
-        }}
-      />
-
-      {/* Overlays */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/70 to-black" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(220,38,38,0.22)_0%,transparent_55%)]" />
-      <div className="absolute inset-0 shadow-[inset_0_0_240px_100px_rgba(0,0,0,0.95)] pointer-events-none" />
+      {/* Section is transparent - the ScrollingBackdrop shows the pixel-art castle */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/70 pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(220,38,38,0.15)_0%,transparent_60%)]" />
+      <div className="absolute inset-0 shadow-[inset_0_0_240px_100px_rgba(0,0,0,0.6)] pointer-events-none" />
 
       {/* Content */}
       <motion.div

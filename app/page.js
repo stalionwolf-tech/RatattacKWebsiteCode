@@ -8,6 +8,7 @@ import { MerchSection } from '@/components/site/MerchSection';
 import { ContactSection } from '@/components/site/ContactSection';
 import { Footer } from '@/components/site/Footer';
 import { AtmosphereBackground } from '@/components/site/AtmosphereBackground';
+import { ScrollingBackdrop } from '@/components/site/ScrollingBackdrop';
 import { CinematicIntro } from '@/components/site/CinematicIntro';
 import { FilmGrain, Scanlines } from '@/components/site/CinematicFX';
 
@@ -15,6 +16,7 @@ const App = () => {
   return (
     <div className="relative min-h-screen bg-black text-neutral-100 overflow-x-hidden">
       <CinematicIntro />
+      <ScrollingBackdrop />
       <AtmosphereBackground />
       <FilmGrain />
       <Scanlines />
