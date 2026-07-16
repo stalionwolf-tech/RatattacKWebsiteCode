@@ -7,8 +7,7 @@ import { FilmGrain, Scanlines } from '@/components/site/CinematicFX';
 import { CartDrawer } from '@/components/store/CartDrawer';
 import { CategoryClient } from '@/components/store/CategoryClient';
 import { EmptyStore } from '@/components/store/EmptyStore';
-import { getCollectionProductsLive } from '@/lib/shopify';
-import { getCollectionMetaLive } from '@/lib/shopify-extras';
+import { getCollectionProductsLive, getCollectionMetaLive } from '@/lib/shopify';
 import { DISCORD_INVITE_URL } from '@/lib/config';
 import { Toaster } from '@/components/ui/sonner';
 

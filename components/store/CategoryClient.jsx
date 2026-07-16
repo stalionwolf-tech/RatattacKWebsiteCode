@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ProductCard, ProductCardSkeleton } from './ProductCard';
 import { FiltersSidebar } from './FiltersSidebar';
 import { SORT_OPTIONS } from '@/lib/products';
-import { deriveFilterOptions } from '@/lib/shopify-extras';
+import { deriveFilterOptions } from '@/lib/shopify';
 
 const PAGE_SIZE = 12;
 

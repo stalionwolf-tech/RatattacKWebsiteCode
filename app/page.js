@@ -10,7 +10,7 @@ import { AtmosphereBackground } from '@/components/site/AtmosphereBackground';
 import { ScrollingBackdrop } from '@/components/site/ScrollingBackdrop';
 import { CinematicIntro } from '@/components/site/CinematicIntro';
 import { FilmGrain, Scanlines } from '@/components/site/CinematicFX';
-import { getFeaturedProductsLive } from '@/lib/shopify-extras';
+import { getFeaturedProductsLive } from '@/lib/shopify';
 
 export const dynamic = 'force-dynamic';
 
