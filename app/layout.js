@@ -1,31 +1,33 @@
 import './globals.css';
 import { Toaster } from '@/components/ui/sonner';
+import { AmbientAudioPlayer } from '@/components/site/AmbientAudioPlayer';
+import { SITE_CONFIG } from '@/lib/config';
 
 export const metadata = {
-  title: 'RatAttacK — Dark Fantasy Gaming Content',
-  description: 'RatAttacK creates funny, high-quality gaming content on Dark and Darker, Escape from Tarkov, extraction shooters, survival games, and other multiplayer chaos. Join the horde.',
-  keywords: ['RatAttacK', 'Dark and Darker', 'Escape from Tarkov', 'gaming', 'YouTube', 'extraction shooter', 'survival games'],
+  title: SITE_CONFIG.seo.defaultTitle,
+  description: SITE_CONFIG.seo.defaultDescription,
+  keywords: SITE_CONFIG.seo.defaultKeywords,
   icons: {
-    icon: '/ratattack-avatar.png',
-    shortcut: '/ratattack-avatar.png',
-    apple: '/ratattack-avatar.png',
+    icon: SITE_CONFIG.brand.logoAvatar,
+    shortcut: SITE_CONFIG.brand.logoAvatar,
+    apple: SITE_CONFIG.brand.logoAvatar,
   },
   openGraph: {
-    title: 'RatAttacK — Dark Fantasy Gaming Content',
-    description: 'Funny, high-quality gaming content. Extraction shooters, survival, and multiplayer chaos.',
+    title: SITE_CONFIG.seo.defaultTitle,
+    description: SITE_CONFIG.seo.defaultDescription,
     type: 'website',
-    images: ['/ratattack-avatar.png'],
+    images: [SITE_CONFIG.seo.ogImage],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'RatAttacK',
-    description: 'Funny, high-quality gaming content.',
-    images: ['/ratattack-avatar.png'],
+    title: SITE_CONFIG.brand.name,
+    description: SITE_CONFIG.seo.defaultDescription,
+    images: [SITE_CONFIG.seo.ogImage],
   },
 };
 
 export const viewport = {
-  themeColor: '#dc2626',
+  themeColor: SITE_CONFIG.theme.primary,
   width: 'device-width',
   initialScale: 1,
 };
@@ -35,6 +37,10 @@ export default function RootLayout({ children }) {
     <html lang="en" className="dark">
       <body className="bg-background text-foreground antialiased">
         {children}
+        {/* Persistent floating ambient audio control. Lives in root layout so
+            playback survives client-side route changes. Renders nothing that
+            affects layout — fixed positioned in the bottom-right. */}
+        <AmbientAudioPlayer />
         <Toaster theme="dark" position="bottom-right" />
       </body>
     </html>
