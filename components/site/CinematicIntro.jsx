@@ -50,8 +50,21 @@ export function CinematicIntro() {
               letterSpacing: phase >= 1 ? '0.08em' : '0.3em',
             }}
             transition={{ duration: 1.6, ease: [0.19, 1, 0.22, 1] }}
-            className="relative z-10 text-center"
+            className="relative z-10 text-center flex flex-col items-center"
           >
+            {/* Avatar */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.4, rotate: -20 }}
+              animate={{ opacity: phase >= 1 ? 1 : 0, scale: phase >= 1 ? 1 : 0.4, rotate: 0 }}
+              transition={{ duration: 1.4, delay: 0.3, ease: [0.19, 1, 0.22, 1] }}
+              className="relative w-28 h-28 md:w-36 md:h-36 mb-6"
+            >
+              <div className="absolute inset-0 rounded-full bg-red-600/50 blur-2xl scale-125" />
+              <div className="relative w-full h-full rounded-full overflow-hidden ring-4 ring-red-700 shadow-[0_0_60px_rgba(220,38,38,0.8)]">
+                <img src="/ratattack-avatar.png" alt="RatAttacK" className="w-full h-full object-cover" />
+              </div>
+            </motion.div>
+
             <div className="text-red-500 tracking-[0.5em] text-[10px] md:text-xs uppercase font-cinzel mb-4 opacity-80">
               A RatAttacK Presentation
             </div>

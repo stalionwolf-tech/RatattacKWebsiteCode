@@ -108,11 +108,28 @@ export function HeroSection() {
           transition={{ duration: 1.5, delay: 3.0, ease: [0.19, 1, 0.22, 1] }}
           className="mb-6 flex justify-center"
         >
-          <div className="w-20 h-20 md:w-24 md:h-24 relative flex items-center justify-center rounded-xl bg-gradient-to-br from-red-900 via-red-700 to-red-950 border-2 border-red-800/80 glow-red-strong animate-pulse-glow">
-            <svg viewBox="0 0 64 64" className="w-3/4 h-3/4 text-red-50 drop-shadow-[0_0_10px_rgba(0,0,0,0.9)]" fill="currentColor">
-              <path d="M32 6c-9 0-16 6.5-16 15 0 4 1.6 7.4 4.2 9.9-.7 1.6-1.2 3.3-1.2 5.1 0 5 3.5 9 8 9.7v3.6c0 1.7 1.4 3.2 3.2 3.2h3.6c1.7 0 3.2-1.4 3.2-3.2v-3.6c4.5-.8 8-4.7 8-9.7 0-1.8-.5-3.5-1.2-5.1C46.4 28.4 48 25 48 21c0-8.5-7-15-16-15zm-8 20a2.5 2.5 0 110-5 2.5 2.5 0 010 5zm16 0a2.5 2.5 0 110-5 2.5 2.5 0 010 5zM32 34c-2 0-3.5-1-3.5-2.2S30 29.6 32 29.6s3.5 1 3.5 2.2S34 34 32 34z"/>
-            </svg>
-          </div>
+          <motion.div
+            animate={{ y: [0, -8, 0] }}
+            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+            className="relative w-36 h-36 md:w-52 md:h-52"
+          >
+            {/* Glow halo behind avatar */}
+            <div className="absolute inset-0 rounded-full bg-red-600/40 blur-3xl scale-110 animate-pulse-glow" />
+            {/* Rotating ring */}
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
+              className="absolute -inset-3 rounded-full border border-dashed border-red-600/40"
+            />
+            <div className="relative w-full h-full rounded-full overflow-hidden ring-4 ring-red-700/80 shadow-[0_0_50px_rgba(220,38,38,0.7),0_0_100px_rgba(220,38,38,0.4)]">
+              <img
+                src="/ratattack-avatar.png"
+                alt="RatAttacK"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+            </div>
+          </motion.div>
         </motion.div>
 
         {/* Title with mask reveal + sheen */}
