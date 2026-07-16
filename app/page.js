@@ -1,10 +1,9 @@
 import { Navbar } from '@/components/site/Navbar';
 import { HeroSection } from '@/components/site/HeroSection';
-import { VideosSection } from '@/components/site/VideosSection';
 import { AboutSection } from '@/components/site/AboutSection';
+import { FeaturedStoreSection } from '@/components/site/FeaturedStoreSection';
 import { CommunitySection } from '@/components/site/CommunitySection';
-import { TCGSection } from '@/components/site/TCGSection';
-import { MerchSection } from '@/components/site/MerchSection';
+import { VideosSection } from '@/components/site/VideosSection';
 import { ContactSection } from '@/components/site/ContactSection';
 import { Footer } from '@/components/site/Footer';
 import { AtmosphereBackground } from '@/components/site/AtmosphereBackground';
@@ -23,11 +22,10 @@ const App = () => {
       <Navbar />
       <main className="relative z-10">
         <HeroSection />
-        <VideosSection />
         <AboutSection />
+        <FeaturedStoreSection />
         <CommunitySection />
-        <TCGSection />
-        <MerchSection />
+        <VideosSection />
         <ContactSection />
       </main>
       <Footer />

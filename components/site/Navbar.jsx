@@ -8,11 +8,10 @@ import { IconMenu, IconClose } from './MedievalIcons';
 import { SITE_CONFIG } from '@/lib/config';
 
 const NAV_LINKS = [
-  { href: '#videos', label: 'Videos' },
   { href: '#about', label: 'About' },
+  { href: '#store', label: 'Store' },
   { href: '#community', label: 'Community' },
-  { href: '#tcg', label: 'TCG Store' },
-  { href: '#merch', label: 'Merch' },
+  { href: '#videos', label: 'Videos' },
   { href: '#contact', label: 'Contact' },
 ];
 
