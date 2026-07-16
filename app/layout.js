@@ -1,6 +1,7 @@
 import './globals.css';
 import { Toaster } from '@/components/ui/sonner';
 import { AmbientAudioPlayer } from '@/components/site/AmbientAudioPlayer';
+import { CustomCursor } from '@/components/site/CustomCursor';
 import { SITE_CONFIG } from '@/lib/config';
 
 export const metadata = {
@@ -41,6 +42,9 @@ export default function RootLayout({ children }) {
             playback survives client-side route changes. Renders nothing that
             affects layout — fixed positioned in the bottom-right. */}
         <AmbientAudioPlayer />
+        {/* Custom medieval dagger cursor. Auto-disables on touch devices +
+            reduced-motion. Toggle via SITE_CONFIG.ui.customCursor. */}
+        <CustomCursor />
         <Toaster theme="dark" position="bottom-right" />
       </body>
     </html>
