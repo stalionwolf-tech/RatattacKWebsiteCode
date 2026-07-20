@@ -1,8 +1,9 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Minus, Plus, ShoppingCart, Zap, ChevronLeft, Truck, ShieldCheck, PackageCheck, Clock, Heart, Share2, Star } from 'lucide-react';
+import { Minus, Plus, ShoppingCart, Zap, ChevronLeft, Truck, ShieldCheck, PackageCheck, Clock, Heart, Share2, Star, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -13,9 +14,11 @@ import { formatPrice, AVAILABILITY_META, getProductByHandle } from '@/lib/produc
 import { useCart, useWishlist, useRecentlyViewed, openCartDrawer } from '@/lib/store-hooks';
 
 export function ProductDetail({ product, related, reviews }) {
+  const router = useRouter();
   const [activeImg, setActiveImg] = useState(0);
   const [qty, setQty] = useState(1);
   const [variantIdx, setVariantIdx] = useState(0);
+  const [buyingNow, setBuyingNow] = useState(false);
   const [zoom, setZoom] = useState({ active: false, x: 50, y: 50 });
   const status = AVAILABILITY_META[product.availability] || AVAILABILITY_META.in_stock;
   const isSoon = product.availability === 'coming_soon';
@@ -39,10 +42,37 @@ export function ProductDetail({ product, related, reviews }) {
     toast.success(`Added ${qty} × ${product.title} to cart`);
     openCartDrawer();
   };
-  const buyNow = () => {
+  const buyNow = async () => {
     if (isSoon) return addToCart();
-    cart.add(product, qty);
-    toast.info('Checkout arrives with the Shopify integration.');
+    const merchandiseId = product.variants?.[variantIdx]?.id;
+    if (!merchandiseId) { toast.error('This product is unavailable for checkout.'); return; }
+    setBuyingNow(true);
+    try {
+      const lines = [{ merchandiseId, quantity: 1 }];
+      const res = await fetch('/api/shopify/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lines }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.checkoutUrl) {
+          window.location.href = data.checkoutUrl;
+          return;
+        }
+      }
+      if (res.status === 422) {
+        toast.info('Preview cart — no live Shopify items yet. Loading demo checkout.');
+        router.push('/checkout');
+        return;
+      }
+      const data = await res.json().catch(() => ({}));
+      toast.error(data?.error || 'Checkout failed. Please try again.');
+    } catch (err) {
+      toast.error(err?.message || 'Network error. Please try again.');
+    } finally {
+      setBuyingNow(false);
+    }
   };
   const share = async () => {
     if (typeof navigator !== 'undefined' && navigator.share) {
@@ -153,9 +183,18 @@ export function ProductDetail({ product, related, reviews }) {
                 <ShoppingCart className="w-5 h-5 mr-3" />
                 <span className="font-cinzel tracking-widest uppercase text-sm">{isSoon ? 'Notify Me' : 'Add to Cart'}</span>
               </Button>
-              <Button onClick={buyNow} size="lg" className="h-14 bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 border-2 border-red-800 text-white glow-red animate-pulse-glow btn-glow-red">
-                <Zap className="w-5 h-5 mr-3" />
-                <span className="font-cinzel tracking-widest uppercase text-sm">Buy Now</span>
+              <Button onClick={buyNow} disabled={buyingNow} size="lg" className="h-14 bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 border-2 border-red-800 text-white glow-red animate-pulse-glow btn-glow-red disabled:opacity-70">
+                {buyingNow ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-3 animate-spin" />
+                    <span className="font-cinzel tracking-widest uppercase text-sm">Preparing…</span>
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-5 h-5 mr-3" />
+                    <span className="font-cinzel tracking-widest uppercase text-sm">Buy Now</span>
+                  </>
+                )}
               </Button>
             </div>
             <div className="flex items-center gap-3">
