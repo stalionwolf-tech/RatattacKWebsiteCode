@@ -5,8 +5,8 @@
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-// Prefer NEXT_PUBLIC_BASE_URL, fall back to the production domain.
-const SITE_URL = (process.env.NEXT_PUBLIC_BASE_URL || 'https://ratattacktcg.com').replace(/\/$/, '');
+// Canonical production origin (never the *.vercel.app deployment URL).
+import { SITE_URL } from '@/lib/config';
 
 // Static routes we always want indexed.
 const ROUTES = [

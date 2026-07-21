@@ -1,6 +1,7 @@
 // Next.js Metadata API robots endpoint → served at /robots.txt (HTTP 200).
-// Defaults to the production domain; honors NEXT_PUBLIC_BASE_URL when set.
-const SITE_URL = (process.env.NEXT_PUBLIC_BASE_URL || 'https://ratattacktcg.com').replace(/\/$/, '');
+// Always emits the canonical production domain for Host/Sitemap (never the
+// *.vercel.app deployment URL).
+import { SITE_URL } from '@/lib/config';
 
 export default function robots() {
   return {
