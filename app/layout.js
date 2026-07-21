@@ -3,10 +3,11 @@ import { Toaster } from '@/components/ui/sonner';
 import { AmbientAudioPlayer } from '@/components/site/AmbientAudioPlayer';
 import { CustomCursor } from '@/components/site/CustomCursor';
 import { AuthProvider } from '@/components/auth/AuthProvider';
-import { SITE_CONFIG } from '@/lib/config';
+import { SITE_CONFIG, SITE_URL } from '@/lib/config';
 
 export const metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://ratattack.gg'),
+  metadataBase: new URL(SITE_URL),
+  alternates: { canonical: '/' },
   title: SITE_CONFIG.seo.defaultTitle,
   description: SITE_CONFIG.seo.defaultDescription,
   keywords: SITE_CONFIG.seo.defaultKeywords,
