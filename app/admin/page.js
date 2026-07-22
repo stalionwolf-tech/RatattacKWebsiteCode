@@ -1,3 +1,4 @@
+import { auth } from '@/auth';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
 
 export const metadata = {
@@ -6,6 +7,7 @@ export const metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function AdminPage() {
-  return <AdminDashboard />;
+export default async function AdminPage() {
+  const session = await auth();
+  return <AdminDashboard user={session?.user ?? null} />;
 }

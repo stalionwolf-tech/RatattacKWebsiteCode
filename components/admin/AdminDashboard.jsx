@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { MOCK_CARDS, CONDITIONS, TYPE_STYLES } from '@/lib/admin/mock-pokemon';
+import { SignOutButton } from '@/components/admin/SignOutButton';
 
 function TypeChip({ type }) {
   const style = TYPE_STYLES[type] || 'bg-neutral-800/80 text-neutral-300 border-neutral-700';
@@ -37,7 +38,7 @@ function DetailRow({ label, children }) {
   );
 }
 
-export function AdminDashboard() {
+export function AdminDashboard({ user = null }) {
   const [query, setQuery] = useState('');
   const [selectedId, setSelectedId] = useState(MOCK_CARDS[0].id);
   const [condition, setCondition] = useState(CONDITIONS[0]);
@@ -86,6 +87,20 @@ export function AdminDashboard() {
             <p className="text-sm text-neutral-400 mt-0.5">
               Search Pokémon cards and publish directly to Shopify
             </p>
+          </div>
+
+          <div className="ml-auto flex items-center gap-4">
+            {user?.email ? (
+              <div className="hidden text-right sm:block">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-neutral-500">
+                  Signed in as
+                </p>
+                <p className="max-w-[220px] truncate text-sm font-medium text-neutral-200">
+                  {user.email}
+                </p>
+              </div>
+            ) : null}
+            <SignOutButton className="h-10 gap-2 border-neutral-700 bg-neutral-950/60 hover:border-red-700 hover:bg-red-950/30" />
           </div>
         </div>
       </header>
