@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import Image from 'next/image';
-import { Search, Package, UploadCloud, Sparkles } from 'lucide-react';
+import { Search, Package, UploadCloud, Sparkles, Loader2, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,10 +17,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { MOCK_CARDS, CONDITIONS, TYPE_STYLES } from '@/lib/admin/mock-pokemon';
+import { CONDITIONS } from '@/lib/admin/mock-pokemon';
 import { SignOutButton } from '@/components/admin/SignOutButton';
+import { usePokemonTCGSearch, type PokemonCard } from '@/hooks/usePokemonTCGSearch';
 
-function TypeChip({ type }) {
+const TYPE_STYLES: Record<string, string> = {
+  Colorless: 'bg-neutral-700/80 text-neutral-100 border-neutral-600',
+  Darkness: 'bg-purple-950/80 text-purple-200 border-purple-800',
+  Dragon: 'bg-indigo-950/80 text-indigo-200 border-indigo-800',
+  Fairy: 'bg-pink-950/80 text-pink-200 border-pink-800',
+  Fighting: 'bg-orange-950/80 text-orange-200 border-orange-800',
+  Fire: 'bg-red-900/80 text-red-100 border-red-800',
+  Grass: 'bg-green-950/80 text-green-200 border-green-800',
+  Lightning: 'bg-yellow-900/80 text-yellow-100 border-yellow-700',
+  Metal: 'bg-slate-700/80 text-slate-100 border-slate-600',
+  Psychic: 'bg-violet-950/80 text-violet-200 border-violet-800',
+  Water: 'bg-blue-900/80 text-blue-100 border-blue-800',
+};
+
+function TypeChip({ type }: { type: string }) {
   const style = TYPE_STYLES[type] || 'bg-neutral-800/80 text-neutral-300 border-neutral-700';
   return (
     <span className={`px-2.5 py-1 rounded-full border text-[11px] font-medium tracking-wide ${style}`}>
@@ -29,7 +44,7 @@ function TypeChip({ type }) {
   );
 }
 
-function DetailRow({ label, children }) {
+function DetailRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-4 py-2.5 border-b border-neutral-800/70 last:border-b-0">
       <span className="text-xs uppercase tracking-[0.18em] text-neutral-500">{label}</span>
@@ -38,28 +53,30 @@ function DetailRow({ label, children }) {
   );
 }
 
-export function AdminDashboard({ user = null }) {
+interface AdminDashboardProps {
+  user?: { email: string } | null;
+}
+
+export function AdminDashboard({ user = null }: AdminDashboardProps) {
   const [query, setQuery] = useState('');
-  const [selectedId, setSelectedId] = useState(MOCK_CARDS[0].id);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [condition, setCondition] = useState(CONDITIONS[0]);
   const [quantity, setQuantity] = useState('1');
   const [price, setPrice] = useState('9.99');
   const [trackInventory, setTrackInventory] = useState(true);
 
-  const results = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return MOCK_CARDS;
-    return MOCK_CARDS.filter(
-      (c) =>
-        c.name.toLowerCase().includes(q) ||
-        c.set.toLowerCase().includes(q) ||
-        c.number.toLowerCase().includes(q),
-    );
-  }, [query]);
+  const { results, isLoading, error, search } = usePokemonTCGSearch();
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newQuery = e.target.value;
+    setQuery(newQuery);
+    setSelectedId(null);
+    search(newQuery);
+  };
 
   const selected = useMemo(
-    () => MOCK_CARDS.find((c) => c.id === selectedId) || null,
-    [selectedId],
+    () => results.find((c) => c.id === selectedId) || null,
+    [selectedId, results],
   );
 
   const handlePublish = () => {
@@ -67,7 +84,7 @@ export function AdminDashboard({ user = null }) {
       toast.error('Select a card to publish.');
       return;
     }
-    toast.success(`Published “${selected.name}” to Shopify`, {
+    toast.success(`Published "${selected.name}" to Shopify`, {
       description: `${condition} · Qty ${quantity || 0} · $${price || '0.00'}`,
     });
   };
@@ -118,20 +135,39 @@ export function AdminDashboard({ user = null }) {
                 <Input
                   id="card-search"
                   value={query}
-                  onChange={(e) => setQuery(e.target.value)}
+                  onChange={handleSearchChange}
                   placeholder="Name, set, or card number…"
                   className="pl-9 bg-neutral-950/70 border-neutral-800 focus-visible:ring-red-600"
+                  minLength={2}
                 />
               </div>
+              {query.length > 0 && query.length < 2 && (
+                <p className="text-xs text-neutral-500 mt-1">Enter at least 2 characters to search.</p>
+              )}
             </div>
 
+            {error && (
+              <div className="mt-3 flex items-start gap-2 rounded-lg bg-red-950/30 border border-red-800/50 p-3">
+                <AlertCircle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
+                <p className="text-xs text-red-300">{error}</p>
+              </div>
+            )}
+
             <p className="mt-4 mb-2 text-[11px] uppercase tracking-[0.18em] text-neutral-500">
-              {results.length} result{results.length === 1 ? '' : 's'}
+              {isLoading ? 'Searching...' : `${results.length} result${results.length === 1 ? '' : 's'}`}
             </p>
 
             <ScrollArea className="flex-1 -mx-1 pr-2">
               <ul className="space-y-2 px-1">
-                {results.map((card) => {
+                {isLoading && query.length >= 2 && (
+                  <li className="py-8 flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-2">
+                      <Loader2 className="h-5 w-5 text-red-500 animate-spin" />
+                      <p className="text-xs text-neutral-500">Searching cards...</p>
+                    </div>
+                  </li>
+                )}
+                {!isLoading && results.map((card) => {
                   const active = card.id === selectedId;
                   return (
                     <li key={card.id}>
@@ -144,28 +180,39 @@ export function AdminDashboard({ user = null }) {
                         }`}
                       >
                         <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-neutral-900 border border-neutral-800">
-                          <Image
-                            src={card.image || '/placeholder.svg'}
-                            alt={card.name}
-                            fill
-                            sizes="56px"
-                            className="object-cover"
-                          />
+                          {card.image ? (
+                            <Image
+                              src={card.image}
+                              alt={card.name}
+                              fill
+                              sizes="56px"
+                              className="object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-neutral-800 flex items-center justify-center text-[8px] text-neutral-500">
+                              No Image
+                            </div>
+                          )}
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className={`truncate text-sm font-semibold ${active ? 'text-red-300' : 'text-white'}`}>
                             {card.name}
                           </p>
-                          <p className="truncate text-xs text-neutral-400">{card.set}</p>
-                          <p className="text-[11px] text-neutral-500 mt-0.5">#{card.number}</p>
+                          <p className="truncate text-xs text-neutral-400">{card.set.name}</p>
+                          <p className="text-[11px] text-neutral-500 mt-0.5">#{card.cardNumber}</p>
                         </div>
                       </button>
                     </li>
                   );
                 })}
-                {results.length === 0 && (
+                {!isLoading && query.length >= 2 && results.length === 0 && (
                   <li className="py-10 text-center text-sm text-neutral-500">
-                    No cards match “{query}”.
+                    No cards match "{query}".
+                  </li>
+                )}
+                {!isLoading && query.length < 2 && query.length > 0 && (
+                  <li className="py-10 text-center text-sm text-neutral-500">
+                    Enter at least 2 characters to search.
                   </li>
                 )}
               </ul>
@@ -179,29 +226,35 @@ export function AdminDashboard({ user = null }) {
                 {/* Card art + attributes */}
                 <div>
                   <div className="relative mx-auto aspect-[3/4] w-full max-w-sm overflow-hidden rounded-2xl border border-neutral-800 bg-gradient-to-br from-neutral-900 to-black">
-                    <Image
-                      src={selected.image || '/placeholder.svg'}
-                      alt={selected.name}
-                      fill
-                      sizes="(max-width: 768px) 90vw, 400px"
-                      className="object-cover"
-                      priority
-                    />
+                    {selected.image ? (
+                      <Image
+                        src={selected.image}
+                        alt={selected.name}
+                        fill
+                        sizes="(max-width: 768px) 90vw, 400px"
+                        className="object-cover"
+                        priority
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-neutral-500 text-sm">
+                        No image available
+                      </div>
+                    )}
                   </div>
 
                   <div className="mt-5">
                     <h2 className="font-cinzel text-2xl font-bold text-white">{selected.name}</h2>
                     <div className="mt-3 flex flex-wrap gap-2">
-                      {selected.types.map((t) => (
+                      {selected.types && selected.types.map((t) => (
                         <TypeChip key={t} type={t} />
                       ))}
                     </div>
                     <div className="mt-4 rounded-xl border border-neutral-800/70 bg-neutral-950/40 px-4">
-                      <DetailRow label="Set">{selected.set}</DetailRow>
-                      <DetailRow label="Card Number">#{selected.number}</DetailRow>
-                      <DetailRow label="Rarity">{selected.rarity}</DetailRow>
-                      <DetailRow label="HP">{selected.hp}</DetailRow>
-                      <DetailRow label="Artist">{selected.artist}</DetailRow>
+                      <DetailRow label="Set">{selected.set.name}</DetailRow>
+                      <DetailRow label="Card Number">#{selected.cardNumber}</DetailRow>
+                      {selected.rarity && <DetailRow label="Rarity">{selected.rarity}</DetailRow>}
+                      {selected.hp && <DetailRow label="HP">{selected.hp}</DetailRow>}
+                      {selected.artist && <DetailRow label="Artist">{selected.artist}</DetailRow>}
                     </div>
                   </div>
                 </div>
@@ -297,7 +350,7 @@ export function AdminDashboard({ user = null }) {
               </div>
             ) : (
               <div className="flex h-full min-h-[300px] items-center justify-center text-neutral-500">
-                Select a card to preview its details.
+                {query.length >= 2 && isLoading ? 'Searching...' : 'Select a card to preview its details.'}
               </div>
             )}
           </Card>
