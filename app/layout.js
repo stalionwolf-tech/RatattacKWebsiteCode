@@ -1,4 +1,5 @@
 import './globals.css';
+import { GoogleAnalytics } from '@next/third-parties/google';
 import { Toaster } from '@/components/ui/sonner';
 import { AmbientAudioPlayer } from '@/components/site/AmbientAudioPlayer';
 import { CustomCursor } from '@/components/site/CustomCursor';
@@ -58,6 +59,11 @@ export const viewport = {
 };
 
 export default function RootLayout({ children }) {
+  // Google Analytics 4 — only loaded in production, and only when a
+  // Measurement ID is configured. The ID is never hardcoded.
+  const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+  const enableGA = process.env.NODE_ENV === 'production' && Boolean(gaMeasurementId);
+
   return (
     <html lang="en" className="dark">
       <body className="bg-background text-foreground antialiased">
@@ -72,6 +78,7 @@ export default function RootLayout({ children }) {
           <CustomCursor />
           <Toaster theme="dark" position="bottom-right" />
         </AuthProvider>
+        {enableGA ? <GoogleAnalytics gaId={gaMeasurementId} /> : null}
       </body>
     </html>
   );
