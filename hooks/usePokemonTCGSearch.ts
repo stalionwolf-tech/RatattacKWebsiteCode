@@ -28,7 +28,7 @@ export function usePokemonTCGSearch() {
     error: null,
   });
 
-  const debounceTimer = useRef<NodeJS.Timeout>();
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const search = useCallback((query: string) => {
     // Clear previous timer
