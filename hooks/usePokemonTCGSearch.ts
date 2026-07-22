@@ -48,17 +48,24 @@ export function usePokemonTCGSearch() {
     debounceTimer.current = setTimeout(async () => {
       try {
         const searchTerm = query.trim();
-        const encodedTerm = encodeURIComponent(searchTerm);
-        const url = `https://api.pokemontcg.io/v2/cards?q=name:${encodedTerm}&pageSize=20`;
+        // Use wildcard syntax: name:*searchTerm*
+        const queryParam = `name:*${searchTerm}*`;
+        const url = `https://api.pokemontcg.io/v2/cards?q=${encodeURIComponent(queryParam)}&pageSize=20`;
         
-        console.log('[v0] Pokémon TCG Search:', { searchTerm, url });
+        console.log('[v0] Pokémon TCG Search:', { searchTerm, queryParam, url });
 
         const response = await fetch(url);
 
         if (!response.ok) {
-          const errorBody = await response.text();
+          let errorBody = '';
+          try {
+            errorBody = await response.text();
+          } catch (e) {
+            errorBody = 'Unable to read error details';
+          }
+          const errorMessage = errorBody || response.statusText || 'Unknown error';
           console.error('[v0] API Error:', { status: response.status, statusText: response.statusText, body: errorBody });
-          throw new Error(`API returned ${response.status}: ${response.statusText}`);
+          throw new Error(`Search failed: ${errorMessage}`);
         }
 
         const data = await response.json();
