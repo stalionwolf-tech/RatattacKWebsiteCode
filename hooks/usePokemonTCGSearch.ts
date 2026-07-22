@@ -47,16 +47,22 @@ export function usePokemonTCGSearch() {
     // Debounce the API call by 300ms
     debounceTimer.current = setTimeout(async () => {
       try {
-        const searchQuery = encodeURIComponent(query.trim());
-        const response = await fetch(
-          `https://api.pokemontcg.io/v2/cards?q=name:"${query.trim()}"*&pageSize=20`
-        );
+        const searchTerm = query.trim();
+        const encodedTerm = encodeURIComponent(searchTerm);
+        const url = `https://api.pokemontcg.io/v2/cards?q=name:${encodedTerm}&pageSize=20`;
+        
+        console.log('[v0] Pokémon TCG Search:', { searchTerm, url });
+
+        const response = await fetch(url);
 
         if (!response.ok) {
-          throw new Error(`API error: ${response.statusText}`);
+          const errorBody = await response.text();
+          console.error('[v0] API Error:', { status: response.status, statusText: response.statusText, body: errorBody });
+          throw new Error(`API returned ${response.status}: ${response.statusText}`);
         }
 
         const data = await response.json();
+        console.log('[v0] API Response:', { dataCount: data.data?.length || 0, totalCount: data.totalCount });
 
         // Transform API response to our card format
         const cards: PokemonCard[] = (data.data || []).map((card: any) => ({
@@ -80,10 +86,12 @@ export function usePokemonTCGSearch() {
           error: null,
         });
       } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to search cards';
+        console.error('[v0] Search error:', errorMessage);
         setState({
           results: [],
           isLoading: false,
-          error: err instanceof Error ? err.message : 'Failed to search cards',
+          error: errorMessage,
         });
       }
     }, 300);
