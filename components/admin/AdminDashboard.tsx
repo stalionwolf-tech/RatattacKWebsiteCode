@@ -137,7 +137,7 @@ export function AdminDashboard({ user = null }: AdminDashboardProps) {
                   value={query}
                   onChange={handleSearchChange}
                   placeholder="Name, set, or card number…"
-                  className="pl-10 bg-neutral-950/70 border-neutral-800 focus-visible:ring-red-600"
+                  className="pl-10 bg-neutral-950/70 border-neutral-800 focus-visible:ring-red-600 text-black"
                   minLength={2}
                 />
               </div>
