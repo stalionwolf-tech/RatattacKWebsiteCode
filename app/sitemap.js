@@ -36,7 +36,7 @@ export default async function sitemap() {
   // 2. Shopify collection pages (/store/category/[handle]).
   let collectionEntries = [];
   try {
-    const { getCollectionsLive } = await import('@/lib/shopify');
+    const { getCollectionsLive } = await import('@/lib/shopify-storefront');
     const { collections } = await getCollectionsLive({ first: 100 });
     collectionEntries = (collections || []).map((c) => ({
       url: `${SITE_URL}/store/category/${c.handle}`,
@@ -51,7 +51,7 @@ export default async function sitemap() {
   // 3. Shopify product pages (/store/product/[handle]).
   let productEntries = [];
   try {
-    const { getAllProductsLive } = await import('@/lib/shopify');
+    const { getAllProductsLive } = await import('@/lib/shopify-storefront');
     const { products } = await getAllProductsLive({ first: 250 });
     productEntries = (products || []).map((p) => ({
       url: `${SITE_URL}/store/product/${p.handle}`,

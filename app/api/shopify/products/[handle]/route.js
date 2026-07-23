@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getProductByHandleLive } from '@/lib/shopify';
+import { getProductByHandleLive } from '@/lib/shopify-storefront';
 
 export const dynamic = 'force-dynamic';
 

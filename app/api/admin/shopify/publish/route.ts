@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { publishProduct, ShopifyError, type InventoryItem } from '@/lib/shopify';
+import { publishProduct, ShopifyError, type InventoryItem } from '@/lib/shopify-admin';
 
 /**
  * POST /api/admin/shopify/publish

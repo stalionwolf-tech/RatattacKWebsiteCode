@@ -7,7 +7,7 @@ import { CartDrawer } from '@/components/store/CartDrawer';
 import { StoreHomeClient } from '@/components/store/StoreHomeClient';
 import { EmptyStore } from '@/components/store/EmptyStore';
 import { CURRENT_PROMOS } from '@/lib/products';
-import { getAllProductsLive, getCollectionsLive, getFeaturedProductsLive, getSaleProductsLive } from '@/lib/shopify';
+import { getAllProductsLive, getCollectionsLive, getFeaturedProductsLive, getSaleProductsLive } from '@/lib/shopify-storefront';
 import { RecentlyViewed } from '@/components/store/RecentlyViewed';
 import { Toaster } from '@/components/ui/sonner';
 

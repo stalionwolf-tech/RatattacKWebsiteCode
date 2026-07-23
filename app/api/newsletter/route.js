@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { subscribeToNewsletter } from '@/lib/shopify';
+import { subscribeToNewsletter } from '@/lib/shopify-storefront';
 
 export const dynamic = 'force-dynamic';
 

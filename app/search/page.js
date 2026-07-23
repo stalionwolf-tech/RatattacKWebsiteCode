@@ -7,7 +7,7 @@ import { FilmGrain, Scanlines } from '@/components/site/CinematicFX';
 import { CartDrawer } from '@/components/store/CartDrawer';
 import { SearchClient } from '@/components/store/SearchClient';
 import { Toaster } from '@/components/ui/sonner';
-import { getAllProductsLive } from '@/lib/shopify';
+import { getAllProductsLive } from '@/lib/shopify-storefront';
 
 export const dynamic = 'force-dynamic';
 export const metadata = {
