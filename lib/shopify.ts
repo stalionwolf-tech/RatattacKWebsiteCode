@@ -219,6 +219,7 @@ async function shopifyGraphQL<T>(
   const text = await res.text();
 
   if (!res.ok) {
+    console.log(`[v0] Shopify GraphQL HTTP ${res.status} ${res.statusText}. Body:`, text);
     throw new ShopifyError(
       `Shopify API request failed (${res.status} ${res.statusText}): ${text.slice(0, 500)}`,
     );
@@ -228,10 +229,12 @@ async function shopifyGraphQL<T>(
   try {
     json = JSON.parse(text);
   } catch {
+    console.log('[v0] Shopify returned non-JSON GraphQL response. Body:', text);
     throw new ShopifyError(`Shopify returned a non-JSON response: ${text.slice(0, 500)}`);
   }
 
   if (json.errors?.length) {
+    console.log('[v0] Shopify GraphQL errors:', JSON.stringify(json.errors));
     throw new ShopifyError(json.errors.map((e) => e.message).join(' | '));
   }
 

@@ -143,7 +143,17 @@ export function AdminDashboard({ user = null }: AdminDashboardProps) {
         }),
       });
 
-      const data = await res.json();
+      // Read as text first so an empty/non-JSON body surfaces the real error
+      // instead of a cryptic "Unexpected end of JSON input".
+      const text = await res.text();
+      console.log('[v0] Publish response status:', res.status, 'body:', text);
+
+      let data: any;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        throw new Error(`Server returned invalid JSON: ${text || '(empty response)'}`);
+      }
 
       if (!res.ok || !data?.success) {
         // Surface the EXACT error returned by the server/Shopify — never fake success.
