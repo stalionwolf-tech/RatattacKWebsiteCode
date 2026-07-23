@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getAllProductsLive, shopifyEnabled } from '@/lib/shopify';
+import { getAllProductsLive, shopifyEnabled } from '@/lib/shopify-storefront';
 
 export const dynamic = 'force-dynamic';
 

@@ -6,7 +6,7 @@ import { AtmosphereBackground } from '@/components/site/AtmosphereBackground';
 import { FilmGrain, Scanlines } from '@/components/site/CinematicFX';
 import { CartDrawer } from '@/components/store/CartDrawer';
 import { ProductDetail } from '@/components/store/ProductDetail';
-import { getProductByHandleLive, getAllProductsLive } from '@/lib/shopify';
+import { getProductByHandleLive, getAllProductsLive } from '@/lib/shopify-storefront';
 import { Toaster } from '@/components/ui/sonner';
 import { RecentlyViewed } from '@/components/store/RecentlyViewed';
 import { RecordRecentlyViewed } from '@/components/store/RecordRecentlyViewed';
