@@ -48,31 +48,59 @@ export function usePokemonTCGSearch() {
     debounceTimer.current = setTimeout(async () => {
       try {
         const searchTerm = query.trim();
-        // Use wildcard syntax: name:*searchTerm*
-        const queryParam = `name:*${searchTerm}*`;
-        const url = `https://api.pokemontcg.io/v2/cards?q=${encodeURIComponent(queryParam)}&pageSize=20`;
-        
-        console.log('[v0] Pokémon TCG Search:', { searchTerm, queryParam, url });
 
-        const response = await fetch(url);
+        // Run a single query against the Pokémon TCG API. URLSearchParams
+        // handles all URL-encoding (spaces, apostrophes, accents, ♀/♂, etc.),
+        // so we never manually concatenate the query string.
+        const runQuery = async (q: string) => {
+          const params = new URLSearchParams({ q, pageSize: '20' });
+          const url = `https://api.pokemontcg.io/v2/cards?${params.toString()}`;
+          console.log('[v0] Pokémon TCG Search:', { q, url });
 
-        if (!response.ok) {
-          let errorBody = '';
-          try {
-            errorBody = await response.text();
-          } catch (e) {
-            errorBody = 'Unable to read error details';
+          const response = await fetch(url);
+
+          if (!response.ok) {
+            // Surface the real API error message instead of "Unknown error".
+            let apiMessage = '';
+            try {
+              const body = await response.clone().json();
+              apiMessage = body?.error?.message || body?.message || '';
+            } catch {
+              try {
+                apiMessage = await response.text();
+              } catch {
+                apiMessage = '';
+              }
+            }
+            const message =
+              apiMessage || response.statusText || `Request failed (${response.status})`;
+            console.error('[v0] API Error:', { status: response.status, message });
+            throw new Error(message);
           }
-          const errorMessage = errorBody || response.statusText || 'Unknown error';
-          console.error('[v0] API Error:', { status: response.status, statusText: response.statusText, body: errorBody });
-          throw new Error(`Search failed: ${errorMessage}`);
+
+          const data = await response.json();
+          return (data.data || []) as any[];
+        };
+
+        // 1) Exact phrase search: name:"search term".
+        //    Inside a quoted phrase only " and \ are special to Lucene.
+        const phrase = searchTerm.replace(/(["\\])/g, '\\$1');
+        let rawCards = await runQuery(`name:"${phrase}"`);
+
+        // 2) Fallback to a wildcard search when the phrase yields nothing.
+        //    Escape Lucene special characters so names with : - . ' etc. stay
+        //    valid, then bridge internal spaces with * (an un-escaped space in a
+        //    wildcard query is rejected by the API).
+        if (rawCards.length === 0) {
+          const escaped = searchTerm
+            .replace(/([+\-&|!(){}[\]^"~?:\\/])/g, '\\$1')
+            .replace(/\s+/g, '*');
+          console.log('[v0] No phrase matches, falling back to wildcard search');
+          rawCards = await runQuery(`name:*${escaped}*`);
         }
 
-        const data = await response.json();
-        console.log('[v0] API Response:', { dataCount: data.data?.length || 0, totalCount: data.totalCount });
-
         // Transform API response to our card format
-        const cards: PokemonCard[] = (data.data || []).map((card: any) => ({
+        const cards: PokemonCard[] = rawCards.map((card: any) => ({
           id: card.id,
           name: card.name,
           image: card.images?.small || card.images?.large || '',
