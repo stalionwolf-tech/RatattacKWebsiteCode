@@ -64,6 +64,7 @@ export function AdminDashboard({ user = null }: AdminDashboardProps) {
   const [quantity, setQuantity] = useState('1');
   const [price, setPrice] = useState('9.99');
   const [trackInventory, setTrackInventory] = useState(true);
+  const [isPublishing, setIsPublishing] = useState(false);
 
   const { results, isLoading, error, search } = usePokemonTCGSearch();
 
@@ -79,14 +80,47 @@ export function AdminDashboard({ user = null }: AdminDashboardProps) {
     [selectedId, results],
   );
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
     if (!selected) {
       toast.error('Select a card to publish.');
       return;
     }
-    toast.success(`Published "${selected.name}" to Shopify`, {
-      description: `${condition} · Qty ${quantity || 0} · $${price || '0.00'}`,
-    });
+
+    setIsPublishing(true);
+    try {
+      const res = await fetch('/api/admin/shopify/publish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          card: selected,
+          condition,
+          quantity: Number(quantity) || 0,
+          price,
+          trackInventory,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data?.success) {
+        // Show the EXACT error message returned by the server/Shopify.
+        toast.error('Failed to publish to Shopify', {
+          description: data?.error || `Request failed (${res.status}).`,
+        });
+        return;
+      }
+
+      // Only report success after Shopify confirmed the product was created.
+      toast.success(`Published "${selected.name}" to Shopify`, {
+        description: `Product ID ${data.productAdminId ?? data.productId} · ${condition} · Qty ${quantity || 0} · $${price || '0.00'}`,
+      });
+    } catch (err) {
+      toast.error('Failed to publish to Shopify', {
+        description: err instanceof Error ? err.message : 'Network error.',
+      });
+    } finally {
+      setIsPublishing(false);
+    }
   };
 
   return (
@@ -340,10 +374,20 @@ export function AdminDashboard({ user = null }: AdminDashboardProps) {
                   <div className="mt-auto pt-7">
                     <Button
                       onClick={handlePublish}
-                      className="w-full h-12 text-base font-semibold bg-emerald-600 hover:bg-emerald-500 text-white"
+                      disabled={isPublishing}
+                      className="w-full h-12 text-base font-semibold bg-emerald-600 hover:bg-emerald-500 text-white disabled:opacity-70"
                     >
-                      <UploadCloud className="mr-2 h-5 w-5" />
-                      Publish to Shopify
+                      {isPublishing ? (
+                        <>
+                          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                          Publishing to Shopify…
+                        </>
+                      ) : (
+                        <>
+                          <UploadCloud className="mr-2 h-5 w-5" />
+                          Publish to Shopify
+                        </>
+                      )}
                     </Button>
                   </div>
                 </div>
