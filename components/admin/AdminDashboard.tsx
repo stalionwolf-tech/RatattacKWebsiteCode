@@ -173,7 +173,11 @@ export function AdminDashboard({ user = null }: AdminDashboardProps) {
         description: `"${selected.name}" is now a product in your Shopify store.`,
       });
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Network error.';
+      console.log('[v0] Publish request threw. typeof:', typeof err, 'value:', err);
+      const message =
+        err && typeof err === 'object' && 'message' in err
+          ? String((err as { message: unknown }).message)
+          : 'Network error.';
       setPublishError(message);
       toast.error('Failed to publish to Shopify', { description: message });
     } finally {

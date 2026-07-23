@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { publishProduct, ShopifyError, type InventoryItem } from '@/lib/shopify';
+import { publishProduct, type InventoryItem } from '@/lib/shopify';
 
 /**
  * POST /api/admin/shopify/publish
@@ -100,20 +100,29 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, ...result });
   } catch (error) {
     // Never let an exception escape without structured JSON.
+    // Use safe property checks instead of `instanceof` — the right-hand side of
+    // `instanceof` can be undefined at runtime (e.g. a bundling/import issue),
+    // which itself throws "Right-hand side of 'instanceof' is not an object".
+    console.log('[v0] Shopify publish caught error. typeof:', typeof error, 'value:', error);
+
     const message =
-      error instanceof ShopifyError
-        ? error.message
-        : error instanceof Error
-          ? error.message
-          : 'Unknown error';
+      error && typeof error === 'object' && 'message' in error
+        ? String((error as { message: unknown }).message)
+        : String(error);
+
+    const stack =
+      error && typeof error === 'object' && 'stack' in error
+        ? String((error as { stack: unknown }).stack)
+        : undefined;
+
     console.log('[v0] Shopify publish failed:', message);
-    if (error instanceof Error && error.stack) console.log('[v0] Stack:', error.stack);
+    if (stack) console.log('[v0] Stack:', stack);
 
     return NextResponse.json(
       {
         success: false,
         error: message,
-        stack: process.env.NODE_ENV === 'development' && error instanceof Error ? error.stack : undefined,
+        stack: process.env.NODE_ENV === 'development' ? stack : undefined,
       },
       { status: 500 },
     );

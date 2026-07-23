@@ -121,7 +121,10 @@ export function usePokemonTCGSearch() {
           error: null,
         });
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to search cards';
+        const errorMessage =
+          err && typeof err === 'object' && 'message' in err
+            ? String((err as { message: unknown }).message)
+            : 'Failed to search cards';
         console.error('[v0] Search error:', errorMessage);
         setState({
           results: [],

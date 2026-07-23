@@ -28,6 +28,18 @@ export class ShopifyError extends Error {
   }
 }
 
+/**
+ * Safely extract a message from an unknown thrown value without using
+ * `instanceof` (whose right-hand side can be undefined at runtime and throw
+ * "Right-hand side of 'instanceof' is not an object").
+ */
+function errorMessage(err: unknown): string {
+  if (err && typeof err === 'object' && 'message' in err) {
+    return String((err as { message: unknown }).message);
+  }
+  return String(err);
+}
+
 /* -------------------------------------------------------------------------- */
 /*  Configuration                                                             */
 /* -------------------------------------------------------------------------- */
@@ -115,10 +127,9 @@ async function getAccessToken(forceRefresh = false): Promise<string> {
       cache: 'no-store',
     });
   } catch (err) {
+    console.log('[v0] Shopify auth network error. typeof:', typeof err, 'value:', err);
     throw new ShopifyError(
-      `Network error while authenticating with Shopify: ${
-        err instanceof Error ? err.message : 'unknown error'
-      }`,
+      `Network error while authenticating with Shopify: ${errorMessage(err)}`,
     );
   }
 
@@ -197,11 +208,8 @@ async function shopifyGraphQL<T>(
       cache: 'no-store',
     });
   } catch (err) {
-    throw new ShopifyError(
-      `Network error contacting Shopify: ${
-        err instanceof Error ? err.message : 'unknown error'
-      }`,
-    );
+    console.log('[v0] Shopify GraphQL network error. typeof:', typeof err, 'value:', err);
+    throw new ShopifyError(`Network error contacting Shopify: ${errorMessage(err)}`);
   }
 
   // Expired/revoked token -> refresh once and retry.
