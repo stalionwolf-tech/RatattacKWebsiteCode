@@ -137,7 +137,7 @@ export function AdminDashboard({ user = null }: AdminDashboardProps) {
                   value={query}
                   onChange={handleSearchChange}
                   placeholder="Name, set, or card number…"
-                  className="pl-10 bg-neutral-950/70 border-neutral-800 focus-visible:ring-red-600 text-black"
+                  className="pl-10 bg-neutral-950/70 border-neutral-800 focus-visible:ring-red-600 text-neutral-100"
                   minLength={2}
                 />
               </div>
@@ -272,7 +272,7 @@ export function AdminDashboard({ user = null }: AdminDashboardProps) {
                         Condition
                       </Label>
                       <Select value={condition} onValueChange={setCondition}>
-                        <SelectTrigger className="bg-neutral-950/70 border-neutral-800 focus:ring-red-600">
+                        <SelectTrigger className="bg-neutral-950/70 border-neutral-800 focus:ring-red-600 text-neutral-100">
                           <SelectValue placeholder="Select condition" />
                         </SelectTrigger>
                         <SelectContent>
@@ -296,7 +296,7 @@ export function AdminDashboard({ user = null }: AdminDashboardProps) {
                           min="0"
                           value={quantity}
                           onChange={(e) => setQuantity(e.target.value)}
-                          className="bg-neutral-950/70 border-neutral-800 focus-visible:ring-red-600"
+                          className="bg-neutral-950/70 border-neutral-800 focus-visible:ring-red-600 text-neutral-100"
                         />
                       </div>
                       <div className="space-y-2">
@@ -304,7 +304,7 @@ export function AdminDashboard({ user = null }: AdminDashboardProps) {
                           Price (USD)
                         </Label>
                         <div className="relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-neutral-500">$</span>
+                          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-neutral-400">$</span>
                           <Input
                             id="price"
                             type="number"
@@ -312,7 +312,7 @@ export function AdminDashboard({ user = null }: AdminDashboardProps) {
                             step="0.01"
                             value={price}
                             onChange={(e) => setPrice(e.target.value)}
-                            className="pl-7 bg-neutral-950/70 border-neutral-800 focus-visible:ring-red-600"
+                            className="pl-8 bg-neutral-950/70 border-neutral-800 focus-visible:ring-red-600 text-neutral-100"
                           />
                         </div>
                       </div>
