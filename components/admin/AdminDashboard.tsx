@@ -2,7 +2,16 @@
 
 import { useMemo, useState } from 'react';
 import Image from 'next/image';
-import { Search, Package, UploadCloud, Sparkles, Loader2, AlertCircle } from 'lucide-react';
+import {
+  Search,
+  Package,
+  UploadCloud,
+  Sparkles,
+  Loader2,
+  AlertCircle,
+  CheckCircle2,
+  ExternalLink,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -65,14 +74,31 @@ export function AdminDashboard({ user = null }: AdminDashboardProps) {
   const [price, setPrice] = useState('9.99');
   const [trackInventory, setTrackInventory] = useState(true);
   const [isPublishing, setIsPublishing] = useState(false);
+  const [publishResult, setPublishResult] = useState<{
+    productAdminId: string;
+    adminUrl: string;
+    storeUrl: string;
+  } | null>(null);
+  const [publishError, setPublishError] = useState<string | null>(null);
 
   const { results, isLoading, error, search } = usePokemonTCGSearch();
+
+  const resetPublishState = () => {
+    setPublishResult(null);
+    setPublishError(null);
+  };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newQuery = e.target.value;
     setQuery(newQuery);
     setSelectedId(null);
+    resetPublishState();
     search(newQuery);
+  };
+
+  const handleSelectCard = (id: string) => {
+    setSelectedId(id);
+    resetPublishState();
   };
 
   const selected = useMemo(
@@ -86,7 +112,24 @@ export function AdminDashboard({ user = null }: AdminDashboardProps) {
       return;
     }
 
+    // ---- Client-side validation (server re-validates too) ----
+    if (!selected.name?.trim()) {
+      toast.error('Card name is missing.');
+      return;
+    }
+    const priceNumber = Number(price);
+    if (!Number.isFinite(priceNumber) || priceNumber <= 0) {
+      toast.error('Enter a price greater than 0 before publishing.');
+      return;
+    }
+    const quantityNumber = Number(quantity);
+    if (!Number.isFinite(quantityNumber) || quantityNumber < 0) {
+      toast.error('Quantity cannot be negative.');
+      return;
+    }
+
     setIsPublishing(true);
+    resetPublishState();
     try {
       const res = await fetch('/api/admin/shopify/publish', {
         method: 'POST',
@@ -94,7 +137,7 @@ export function AdminDashboard({ user = null }: AdminDashboardProps) {
         body: JSON.stringify({
           card: selected,
           condition,
-          quantity: Number(quantity) || 0,
+          quantity: Math.floor(quantityNumber),
           price,
           trackInventory,
         }),
@@ -103,21 +146,26 @@ export function AdminDashboard({ user = null }: AdminDashboardProps) {
       const data = await res.json();
 
       if (!res.ok || !data?.success) {
-        // Show the EXACT error message returned by the server/Shopify.
-        toast.error('Failed to publish to Shopify', {
-          description: data?.error || `Request failed (${res.status}).`,
-        });
+        // Surface the EXACT error returned by the server/Shopify — never fake success.
+        const message = data?.error || `Request failed (${res.status}).`;
+        setPublishError(message);
+        toast.error('Failed to publish to Shopify', { description: message });
         return;
       }
 
       // Only report success after Shopify confirmed the product was created.
-      toast.success(`Published "${selected.name}" to Shopify`, {
-        description: `Product ID ${data.productAdminId ?? data.productId} · ${condition} · Qty ${quantity || 0} · $${price || '0.00'}`,
+      setPublishResult({
+        productAdminId: data.productAdminId,
+        adminUrl: data.adminUrl,
+        storeUrl: data.storeUrl,
+      });
+      toast.success('Published Successfully', {
+        description: `"${selected.name}" is now a product in your Shopify store.`,
       });
     } catch (err) {
-      toast.error('Failed to publish to Shopify', {
-        description: err instanceof Error ? err.message : 'Network error.',
-      });
+      const message = err instanceof Error ? err.message : 'Network error.';
+      setPublishError(message);
+      toast.error('Failed to publish to Shopify', { description: message });
     } finally {
       setIsPublishing(false);
     }
@@ -206,7 +254,7 @@ export function AdminDashboard({ user = null }: AdminDashboardProps) {
                   return (
                     <li key={card.id}>
                       <button
-                        onClick={() => setSelectedId(card.id)}
+                        onClick={() => handleSelectCard(card.id)}
                         className={`w-full flex items-center gap-3 rounded-xl border p-2.5 text-left transition-colors ${
                           active
                             ? 'border-red-600 bg-red-950/30'
@@ -389,6 +437,52 @@ export function AdminDashboard({ user = null }: AdminDashboardProps) {
                         </>
                       )}
                     </Button>
+
+                    {/* Success state */}
+                    {publishResult && (
+                      <div className="mt-4 rounded-xl border border-emerald-800/60 bg-emerald-950/30 p-4">
+                        <div className="flex items-center gap-2 text-emerald-300">
+                          <CheckCircle2 className="h-5 w-5" />
+                          <span className="text-sm font-semibold">Published Successfully</span>
+                        </div>
+                        <p className="mt-1 text-xs text-emerald-200/80">
+                          Product ID {publishResult.productAdminId} created in your Shopify store.
+                        </p>
+                        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <Button
+                            asChild
+                            variant="outline"
+                            className="h-10 border-emerald-700 bg-transparent text-emerald-200 hover:bg-emerald-900/40 hover:text-emerald-100"
+                          >
+                            <a href={publishResult.adminUrl} target="_blank" rel="noopener noreferrer">
+                              <ExternalLink className="mr-2 h-4 w-4" />
+                              Open in Shopify Admin
+                            </a>
+                          </Button>
+                          <Button
+                            asChild
+                            variant="outline"
+                            className="h-10 border-neutral-700 bg-transparent text-neutral-200 hover:bg-neutral-800/60 hover:text-white"
+                          >
+                            <a href={publishResult.storeUrl} target="_blank" rel="noopener noreferrer">
+                              <ExternalLink className="mr-2 h-4 w-4" />
+                              View Live Product
+                            </a>
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Error state */}
+                    {publishError && (
+                      <div className="mt-4 flex items-start gap-2 rounded-xl border border-red-800/60 bg-red-950/30 p-4">
+                        <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-400" />
+                        <div>
+                          <p className="text-sm font-semibold text-red-300">Publish failed</p>
+                          <p className="mt-1 text-xs text-red-200/90 break-words">{publishError}</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
