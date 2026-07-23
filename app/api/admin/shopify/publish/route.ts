@@ -6,84 +6,116 @@ import { publishProduct, ShopifyError, type InventoryItem } from '@/lib/shopify'
  * POST /api/admin/shopify/publish
  *
  * Creates a real Shopify product from an inventory item. Fully server-side:
- * Shopify credentials never reach the browser. All Shopify logic lives in
- * lib/shopify.ts. This route only handles auth, validation, and shaping the
- * response.
+ * Shopify credentials never reach the browser.
  *
- * Already gated by middleware.js (matcher includes /api/admin/:path*), but we
- * re-verify the admin session here as defense-in-depth.
+ * The ENTIRE handler is wrapped in try/catch so we ALWAYS return JSON — never
+ * an empty body (which the browser reports as "Unexpected end of JSON input").
  */
 export async function POST(request: Request) {
-  // ---- Verify admin session ----------------------------------------------
-  const session = await auth();
-  const sessionUser = session?.user as { email?: string; isAdmin?: boolean } | undefined;
-  if (!sessionUser) {
-    return NextResponse.json({ error: 'Unauthorized. Please sign in.' }, { status: 401 });
-  }
-  if (!sessionUser.isAdmin) {
-    return NextResponse.json(
-      { error: 'Forbidden. Your account is not an authorized admin.' },
-      { status: 403 },
-    );
-  }
-
-  // ---- Parse body ---------------------------------------------------------
-  let body: any;
   try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON body.' }, { status: 400 });
-  }
+    console.log('[v0] Starting Shopify publish');
 
-  const { card, condition, quantity, price, trackInventory } = body ?? {};
+    // ---- 1. Verify required environment variables FIRST -------------------
+    console.log('[v0] Loading environment variables');
+    for (const key of ['SHOPIFY_CLIENT_ID', 'SHOPIFY_CLIENT_SECRET', 'SHOPIFY_SHOP'] as const) {
+      if (!process.env[key]?.trim()) {
+        console.log(`[v0] Missing environment variable: ${key}`);
+        return NextResponse.json(
+          { success: false, error: `Missing environment variable: ${key}` },
+          { status: 500 },
+        );
+      }
+    }
 
-  // ---- Validate before touching Shopify -----------------------------------
-  if (!card?.name) {
-    return NextResponse.json({ error: 'A Pokémon card must be selected.' }, { status: 400 });
-  }
-  const priceNumber = Number(price);
-  if (!Number.isFinite(priceNumber) || priceNumber <= 0) {
-    return NextResponse.json(
-      { error: 'Price is required and must be greater than 0.' },
-      { status: 400 },
-    );
-  }
-  const quantityNumber = Number(quantity);
-  if (!Number.isFinite(quantityNumber) || quantityNumber < 0) {
-    return NextResponse.json(
-      { error: 'Quantity must be 0 or greater.' },
-      { status: 400 },
-    );
-  }
+    // ---- 2. Verify admin session (defense-in-depth over middleware) -------
+    console.log('[v0] Verifying admin session');
+    const session = await auth();
+    const sessionUser = session?.user as { email?: string; isAdmin?: boolean } | undefined;
+    if (!sessionUser) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized. Please sign in.' },
+        { status: 401 },
+      );
+    }
+    if (!sessionUser.isAdmin) {
+      return NextResponse.json(
+        { success: false, error: 'Forbidden. Your account is not an authorized admin.' },
+        { status: 403 },
+      );
+    }
 
-  const item: InventoryItem = {
-    name: card.name,
-    set: card.set?.name,
-    cardNumber: card.cardNumber ? String(card.cardNumber) : undefined,
-    rarity: card.rarity || undefined,
-    condition: condition || 'Unspecified',
-    quantity: Math.floor(quantityNumber),
-    price: priceNumber,
-    imageUrl: card.image || undefined,
-    trackInventory: Boolean(trackInventory),
-  };
+    // ---- 3. Parse body ----------------------------------------------------
+    let body: any;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        { success: false, error: 'Invalid JSON body.' },
+        { status: 400 },
+      );
+    }
 
-  // ---- Publish ------------------------------------------------------------
-  try {
+    const { card, condition, quantity, price, trackInventory } = body ?? {};
+
+    // ---- 4. Validate before touching Shopify ------------------------------
+    if (!card?.name) {
+      return NextResponse.json(
+        { success: false, error: 'A Pokémon card must be selected.' },
+        { status: 400 },
+      );
+    }
+    const priceNumber = Number(price);
+    if (!Number.isFinite(priceNumber) || priceNumber <= 0) {
+      return NextResponse.json(
+        { success: false, error: 'Price is required and must be greater than 0.' },
+        { status: 400 },
+      );
+    }
+    const quantityNumber = Number(quantity);
+    if (!Number.isFinite(quantityNumber) || quantityNumber < 0) {
+      return NextResponse.json(
+        { success: false, error: 'Quantity must be 0 or greater.' },
+        { status: 400 },
+      );
+    }
+
+    const item: InventoryItem = {
+      name: card.name,
+      set: card.set?.name,
+      cardNumber: card.cardNumber ? String(card.cardNumber) : undefined,
+      rarity: card.rarity || undefined,
+      condition: condition || 'Unspecified',
+      quantity: Math.floor(quantityNumber),
+      price: priceNumber,
+      imageUrl: card.image || undefined,
+      trackInventory: Boolean(trackInventory),
+    };
+
+    // ---- 5. Authenticate + create product ---------------------------------
+    console.log('[v0] Authenticating');
+    console.log('[v0] Creating product');
     const result = await publishProduct(item);
-    return NextResponse.json(result);
-  } catch (err) {
-    const message =
-      err instanceof ShopifyError
-        ? err.message
-        : err instanceof Error
-          ? err.message
-          : 'Unexpected error while publishing to Shopify.';
-    // Full server-side logging for debugging.
-    console.log('[v0] Shopify publish error:', message);
-    if (err instanceof Error && err.stack) console.log('[v0] Stack:', err.stack);
 
-    const isConfig = message.includes('not configured');
-    return NextResponse.json({ error: message }, { status: isConfig ? 500 : 502 });
+    console.log('[v0] Done');
+    return NextResponse.json({ success: true, ...result });
+  } catch (error) {
+    // Never let an exception escape without structured JSON.
+    const message =
+      error instanceof ShopifyError
+        ? error.message
+        : error instanceof Error
+          ? error.message
+          : 'Unknown error';
+    console.log('[v0] Shopify publish failed:', message);
+    if (error instanceof Error && error.stack) console.log('[v0] Stack:', error.stack);
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: message,
+        stack: process.env.NODE_ENV === 'development' && error instanceof Error ? error.stack : undefined,
+      },
+      { status: 500 },
+    );
   }
 }
