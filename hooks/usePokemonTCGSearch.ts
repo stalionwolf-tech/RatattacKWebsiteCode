@@ -29,115 +29,60 @@ export function usePokemonTCGSearch() {
   });
 
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const abortRef = useRef<AbortController | null>(null);
 
   const search = useCallback((query: string) => {
-    // Clear previous timer
+    // Clear any pending debounced call.
     if (debounceTimer.current) {
       clearTimeout(debounceTimer.current);
     }
 
-    // Reset if query is too short
-    if (query.trim().length < 2) {
+    const searchTerm = query.trim();
+
+    // Reset when the query is too short to search.
+    if (searchTerm.length < 2) {
+      if (abortRef.current) abortRef.current.abort();
       setState({ results: [], isLoading: false, error: null });
       return;
     }
 
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
-    // Debounce the API call by 300ms
+    // Debounce the request by 300ms.
     debounceTimer.current = setTimeout(async () => {
+      // Cancel any in-flight request so responses can't arrive out of order.
+      if (abortRef.current) abortRef.current.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
+
       try {
-        const searchTerm = query.trim();
+        // All query generation, URL-encoding, retry/backoff, and normalization
+        // happen server-side in /api/pokemon/search. The client just forwards
+        // the raw term and renders the normalized cards.
+        const url = `/api/pokemon/search?q=${encodeURIComponent(searchTerm)}`;
+        const response = await fetch(url, { signal: controller.signal });
+        const data = await response.json().catch(() => ({}));
 
-        // Run a single query against the Pokémon TCG API. URLSearchParams
-        // handles all URL-encoding (spaces, apostrophes, accents, ♀/♂, etc.),
-        // so we never manually concatenate the query string.
-        const runQuery = async (q: string) => {
-          const params = new URLSearchParams({ q, pageSize: '20' });
-          const url = `https://api.pokemontcg.io/v2/cards?${params.toString()}`;
-          console.log('[v0] Pokémon TCG Search:', { q, url });
-
-          const response = await fetch(url);
-
-          if (!response.ok) {
-            // Surface the real API error message instead of "Unknown error".
-            let apiMessage = '';
-            try {
-              const body = await response.clone().json();
-              apiMessage = body?.error?.message || body?.message || '';
-            } catch {
-              try {
-                apiMessage = await response.text();
-              } catch {
-                apiMessage = '';
-              }
-            }
-            const message =
-              apiMessage || response.statusText || `Request failed (${response.status})`;
-            console.error('[v0] API Error:', { status: response.status, message });
-            throw new Error(message);
-          }
-
-          const data = await response.json();
-          return (data.data || []) as any[];
-        };
-
-        // 1) Exact phrase search: name:"search term".
-        //    Inside a quoted phrase only " and \ are special to Lucene.
-        const phrase = searchTerm.replace(/(["\\])/g, '\\$1');
-        let rawCards = await runQuery(`name:"${phrase}"`);
-
-        // 2) Fallback to a wildcard search when the phrase yields nothing.
-        //    Escape Lucene special characters so names with : - . ' etc. stay
-        //    valid, then bridge internal spaces with * (an un-escaped space in a
-        //    wildcard query is rejected by the API).
-        if (rawCards.length === 0) {
-          const escaped = searchTerm
-            .replace(/([+\-&|!(){}[\]^"~?:\\/])/g, '\\$1')
-            .replace(/\s+/g, '*');
-          console.log('[v0] No phrase matches, falling back to wildcard search');
-          rawCards = await runQuery(`name:*${escaped}*`);
+        if (!response.ok) {
+          throw new Error(data?.error || `Search failed (${response.status})`);
         }
 
-        // Transform API response to our card format
-        const cards: PokemonCard[] = rawCards.map((card: any) => ({
-          id: card.id,
-          name: card.name,
-          image: card.images?.small || card.images?.large || '',
-          set: {
-            name: card.set?.name || 'Unknown Set',
-            id: card.set?.id || '',
-          },
-          cardNumber: card.number || '',
-          rarity: card.rarity || '',
-          hp: card.hp || '',
-          types: card.types || [],
-          artist: card.artist || '',
-        }));
-
-        setState({
-          results: cards.slice(0, 20),
-          isLoading: false,
-          error: null,
-        });
+        const cards = (Array.isArray(data.cards) ? data.cards : []) as PokemonCard[];
+        setState({ results: cards, isLoading: false, error: null });
       } catch (err) {
+        // Ignore aborted requests — a newer search superseded this one.
+        if (err instanceof DOMException && err.name === 'AbortError') return;
         const errorMessage = err instanceof Error ? err.message : 'Failed to search cards';
-        console.error('[v0] Search error:', errorMessage);
-        setState({
-          results: [],
-          isLoading: false,
-          error: errorMessage,
-        });
+        setState({ results: [], isLoading: false, error: errorMessage });
       }
     }, 300);
   }, []);
 
-  // Cleanup timer on unmount
+  // Cleanup on unmount.
   useEffect(() => {
     return () => {
-      if (debounceTimer.current) {
-        clearTimeout(debounceTimer.current);
-      }
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+      if (abortRef.current) abortRef.current.abort();
     };
   }, []);
 

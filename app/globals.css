@@ -47,6 +47,20 @@
     font-family: 'Cinzel', serif;
     letter-spacing: 0.02em;
   }
+  /*
+   * Guarantee form controls always render visible text.
+   * `-webkit-text-fill-color` is inherited, so an input placed inside any
+   * element using the `.gradient-text` utility (which sets it to transparent
+   * for the clipped-gradient heading effect) would otherwise inherit that
+   * transparency — making typed text invisible while the caret still shows.
+   * Setting it directly on the control breaks that inheritance chain, and
+   * `currentColor` follows whatever text color the control is given.
+   */
+  input,
+  textarea,
+  select {
+    -webkit-text-fill-color: currentColor;
+  }
 }
 
 @layer utilities {
