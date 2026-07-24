@@ -55,7 +55,7 @@ export function SearchDropdown({ compact = false, onNavigate }) {
           onChange={(e) => { setQ(e.target.value); setOpen(true); load(); }}
           onFocus={() => { setOpen(true); load(); }}
           placeholder="Search products…"
-          className="w-full bg-black/50 border border-neutral-800 focus:border-red-600 focus:ring-red-600/30 rounded-md pl-10 pr-9 h-10 text-sm text-neutral-100 outline-none focus:ring-2 transition-premium"
+          className="w-full bg-black/50 border border-neutral-800 focus:border-red-600 focus:ring-red-600/30 rounded-md pl-10 pr-9 h-10 text-sm text-neutral-100 [-webkit-text-fill-color:currentColor] caret-red-500 selection:bg-red-600 selection:text-white outline-none focus:ring-2 transition-premium"
           aria-label="Search the store"
         />
         {q && (
