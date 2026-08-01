@@ -270,6 +270,17 @@ export interface InventoryItemMetadata {
   hp?: string;
   types?: string[];
   artist?: string;
+  // Magic: The Gathering
+  manaCost?: string;
+  cmc?: number;
+  typeLine?: string;
+  oracleText?: string;
+  power?: string;
+  toughness?: string;
+  loyalty?: string;
+  colors?: string[];
+  foil?: boolean;
+  nonfoil?: boolean;
 }
 
 export interface InventoryItem {
@@ -339,6 +350,18 @@ export async function publishProduct(item: InventoryItem): Promise<PublishResult
     ['ATK', typeof meta.atk === 'number' ? String(meta.atk) : undefined],
     ['DEF', typeof meta.def === 'number' ? String(meta.def) : undefined],
     ['Archetype', meta.archetype],
+    // Magic: The Gathering attributes (present only when supplied).
+    ['Mana Cost', meta.manaCost],
+    ['Mana Value', typeof meta.cmc === 'number' ? String(meta.cmc) : undefined],
+    ['Type Line', meta.typeLine],
+    ['Power / Toughness',
+      meta.power || meta.toughness ? `${meta.power ?? '—'} / ${meta.toughness ?? '—'}` : undefined],
+    ['Loyalty', meta.loyalty],
+    ['Oracle Text', meta.oracleText],
+    ['Colors', meta.colors?.length ? meta.colors.join(', ') : undefined],
+    ['Foil', typeof meta.foil === 'boolean' ? (meta.foil ? 'Available' : 'Unavailable') : undefined],
+    ['Nonfoil',
+      typeof meta.nonfoil === 'boolean' ? (meta.nonfoil ? 'Available' : 'Unavailable') : undefined],
     // Pokémon attributes (present only when supplied).
     ['HP', meta.hp],
     ['Type', meta.types?.length ? meta.types.join(', ') : undefined],

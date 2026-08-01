@@ -18,11 +18,13 @@
 import type { GameAdapter, GameId, GameOption } from '@/lib/tcg/types';
 import { PokemonAdapter } from '@/lib/tcg/adapters/PokemonAdapter';
 import { YugiohAdapter } from '@/lib/tcg/adapters/YugiohAdapter';
+import { MagicAdapter } from '@/lib/tcg/adapters/MagicAdapter';
 
 /** All registered adapters, keyed by game id. */
 const ADAPTERS: Record<GameId, GameAdapter> = {
   pokemon: PokemonAdapter,
   yugioh: YugiohAdapter,
+  magic: MagicAdapter,
 };
 
 /** Default game shown when nothing is selected. */
@@ -43,8 +45,9 @@ export function getAdapter(game: string | GameId): GameAdapter {
 
 /** Options for rendering the game selector (order defines display order). */
 export const GAME_OPTIONS: GameOption[] = [
-  { id: 'pokemon', label: PokemonAdapter.label },
-  { id: 'yugioh', label: YugiohAdapter.label },
+  { id: 'pokemon', label: PokemonAdapter.label, short: 'Pokémon' },
+  { id: 'yugioh', label: YugiohAdapter.label, short: 'Yu-Gi-Oh!' },
+  { id: 'magic', label: MagicAdapter.label, short: 'Magic' },
 ];
 
 /** Human label for a game id (e.g. for Shopify tags / descriptions). */

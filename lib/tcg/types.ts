@@ -15,7 +15,7 @@
  */
 
 /** Identifier for a supported trading-card game. */
-export type GameId = 'pokemon' | 'yugioh';
+export type GameId = 'pokemon' | 'yugioh' | 'magic';
 
 /** Extra, game-specific attributes carried alongside the common fields. */
 export interface CardMetadata {
@@ -31,6 +31,21 @@ export interface CardMetadata {
   hp?: string;
   types?: string[];
   artist?: string;
+
+  // Magic: The Gathering specific
+  manaCost?: string;
+  cmc?: number;
+  typeLine?: string;
+  oracleText?: string;
+  power?: string;
+  toughness?: string;
+  loyalty?: string;
+  colors?: string[];
+  colorIdentity?: string[];
+  /** Whether a foil printing is available. */
+  foil?: boolean;
+  /** Whether a nonfoil printing is available. */
+  nonfoil?: boolean;
 
   // Common extras
   /** All set names a card appears in (Yu-Gi-Oh! cards span many sets). */
@@ -81,4 +96,6 @@ export interface GameAdapter<Raw = unknown> {
 export interface GameOption {
   id: GameId;
   label: string;
+  /** Compact label for tight UI (e.g. the game-selector tabs). */
+  short?: string;
 }

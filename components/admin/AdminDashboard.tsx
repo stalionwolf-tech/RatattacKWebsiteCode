@@ -201,6 +201,7 @@ export function AdminDashboard({ user = null }: AdminDashboardProps) {
   };
 
   const isYugioh = selected?.game === 'yugioh';
+  const isMagic = selected?.game === 'magic';
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -247,7 +248,7 @@ export function AdminDashboard({ user = null }: AdminDashboardProps) {
               <div
                 role="tablist"
                 aria-label="Select trading card game"
-                className="grid grid-cols-2 gap-2 rounded-xl border border-neutral-800 bg-neutral-950/60 p-1"
+                className="grid grid-cols-3 gap-2 rounded-xl border border-neutral-800 bg-neutral-950/60 p-1"
               >
                 {GAME_OPTIONS.map((option) => {
                   const active = option.id === game;
@@ -256,14 +257,15 @@ export function AdminDashboard({ user = null }: AdminDashboardProps) {
                       key={option.id}
                       role="tab"
                       aria-selected={active}
+                      title={option.label}
                       onClick={() => handleGameChange(option.id)}
-                      className={`h-9 rounded-lg text-sm font-medium transition-colors ${
+                      className={`h-9 rounded-lg px-1 text-sm font-medium transition-colors ${
                         active
                           ? 'bg-red-600 text-white shadow-sm'
                           : 'text-neutral-300 hover:bg-neutral-800/70 hover:text-white'
                       }`}
                     >
-                      {option.label}
+                      {option.short ?? option.label}
                     </button>
                   );
                 })}
@@ -430,10 +432,54 @@ export function AdminDashboard({ user = null }: AdminDashboardProps) {
                         <DetailRow label="Archetype">{selected.metadata.archetype}</DetailRow>
                       )}
 
+                      {/* Magic: The Gathering-specific rows */}
+                      {isMagic && selected.metadata.manaCost && (
+                        <DetailRow label="Mana Cost">{selected.metadata.manaCost}</DetailRow>
+                      )}
+                      {isMagic && typeof selected.metadata.cmc === 'number' && (
+                        <DetailRow label="Mana Value">{selected.metadata.cmc}</DetailRow>
+                      )}
+                      {isMagic && selected.metadata.typeLine && (
+                        <DetailRow label="Type">{selected.metadata.typeLine}</DetailRow>
+                      )}
+                      {isMagic &&
+                        (selected.metadata.power || selected.metadata.toughness) && (
+                          <DetailRow label="Power / Toughness">
+                            {selected.metadata.power ?? '—'}
+                            {' / '}
+                            {selected.metadata.toughness ?? '—'}
+                          </DetailRow>
+                        )}
+                      {isMagic && selected.metadata.loyalty && (
+                        <DetailRow label="Loyalty">{selected.metadata.loyalty}</DetailRow>
+                      )}
+                      {isMagic && typeof selected.metadata.foil === 'boolean' && (
+                        <DetailRow label="Foil">
+                          {selected.metadata.foil ? 'Available' : 'Unavailable'}
+                        </DetailRow>
+                      )}
+                      {isMagic && typeof selected.metadata.nonfoil === 'boolean' && (
+                        <DetailRow label="Nonfoil">
+                          {selected.metadata.nonfoil ? 'Available' : 'Unavailable'}
+                        </DetailRow>
+                      )}
+
                       {typeof selected.marketPrice === 'number' && (
                         <DetailRow label="Market Price">${selected.marketPrice.toFixed(2)}</DetailRow>
                       )}
                     </div>
+
+                    {/* Magic oracle text reads as a paragraph, not a table row. */}
+                    {isMagic && selected.metadata.oracleText && (
+                      <div className="mt-4 rounded-xl border border-neutral-800/70 bg-neutral-950/40 p-4">
+                        <p className="text-xs uppercase tracking-[0.18em] text-neutral-500 mb-2">
+                          Oracle Text
+                        </p>
+                        <p className="whitespace-pre-line text-sm leading-relaxed text-neutral-200">
+                          {selected.metadata.oracleText}
+                        </p>
+                      </div>
+                    )}
 
                     {/* Yu-Gi-Oh! cards can appear across many sets. */}
                     {isYugioh &&
