@@ -28,7 +28,9 @@ import {
 } from '@/components/ui/select';
 import { CONDITIONS } from '@/lib/admin/mock-pokemon';
 import { SignOutButton } from '@/components/admin/SignOutButton';
-import { usePokemonTCGSearch, type PokemonCard } from '@/hooks/usePokemonTCGSearch';
+import { useCardSearch } from '@/hooks/useCardSearch';
+import { GAME_OPTIONS, getGameLabel, DEFAULT_GAME } from '@/lib/tcg/registry';
+import type { GameId, NormalizedCard } from '@/lib/tcg/types';
 
 const TYPE_STYLES: Record<string, string> = {
   Colorless: 'bg-neutral-700/80 text-neutral-100 border-neutral-600',
@@ -67,6 +69,7 @@ interface AdminDashboardProps {
 }
 
 export function AdminDashboard({ user = null }: AdminDashboardProps) {
+  const [game, setGame] = useState<GameId>(DEFAULT_GAME);
   const [query, setQuery] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [condition, setCondition] = useState(CONDITIONS[0]);
@@ -81,11 +84,26 @@ export function AdminDashboard({ user = null }: AdminDashboardProps) {
   } | null>(null);
   const [publishError, setPublishError] = useState<string | null>(null);
 
-  const { results, isLoading, error, search } = usePokemonTCGSearch();
+  const { results, isLoading, error, search, reset } = useCardSearch();
+
+  const gameLabel = getGameLabel(game);
 
   const resetPublishState = () => {
     setPublishResult(null);
     setPublishError(null);
+  };
+
+  const handleGameChange = (nextGame: GameId) => {
+    if (nextGame === game) return;
+    setGame(nextGame);
+    setSelectedId(null);
+    resetPublishState();
+    // Re-run the current query against the newly selected game's API.
+    if (query.trim().length >= 2) {
+      search(query, nextGame);
+    } else {
+      reset();
+    }
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -93,7 +111,7 @@ export function AdminDashboard({ user = null }: AdminDashboardProps) {
     setQuery(newQuery);
     setSelectedId(null);
     resetPublishState();
-    search(newQuery);
+    search(newQuery, game);
   };
 
   const handleSelectCard = (id: string) => {
@@ -136,6 +154,7 @@ export function AdminDashboard({ user = null }: AdminDashboardProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           card: selected,
+          game: selected.game,
           condition,
           quantity: Math.floor(quantityNumber),
           price,
@@ -181,6 +200,8 @@ export function AdminDashboard({ user = null }: AdminDashboardProps) {
     }
   };
 
+  const isYugioh = selected?.game === 'yugioh';
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
@@ -194,7 +215,7 @@ export function AdminDashboard({ user = null }: AdminDashboardProps) {
               RatAttacK Inventory Manager
             </h1>
             <p className="text-sm text-neutral-400 mt-0.5">
-              Search Pokémon cards and publish directly to Shopify
+              Search trading cards and publish directly to Shopify
             </p>
           </div>
 
@@ -218,9 +239,40 @@ export function AdminDashboard({ user = null }: AdminDashboardProps) {
         <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6">
           {/* Left panel — search */}
           <Card className="glass-panel rounded-2xl p-5 flex flex-col h-fit lg:h-[calc(100vh-160px)] lg:sticky lg:top-6">
+            {/* Game selector */}
             <div className="space-y-2">
+              <Label className="text-xs uppercase tracking-[0.18em] text-neutral-400">
+                Game
+              </Label>
+              <div
+                role="tablist"
+                aria-label="Select trading card game"
+                className="grid grid-cols-2 gap-2 rounded-xl border border-neutral-800 bg-neutral-950/60 p-1"
+              >
+                {GAME_OPTIONS.map((option) => {
+                  const active = option.id === game;
+                  return (
+                    <button
+                      key={option.id}
+                      role="tab"
+                      aria-selected={active}
+                      onClick={() => handleGameChange(option.id)}
+                      className={`h-9 rounded-lg text-sm font-medium transition-colors ${
+                        active
+                          ? 'bg-red-600 text-white shadow-sm'
+                          : 'text-neutral-300 hover:bg-neutral-800/70 hover:text-white'
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="mt-4 space-y-2">
               <Label htmlFor="card-search" className="text-xs uppercase tracking-[0.18em] text-neutral-400">
-                Search Pokémon Cards
+                Search {gameLabel} Cards
               </Label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
@@ -279,6 +331,7 @@ export function AdminDashboard({ user = null }: AdminDashboardProps) {
                               fill
                               sizes="56px"
                               className="object-cover"
+                              unoptimized
                             />
                           ) : (
                             <div className="w-full h-full bg-neutral-800 flex items-center justify-center text-[8px] text-neutral-500">
@@ -290,8 +343,8 @@ export function AdminDashboard({ user = null }: AdminDashboardProps) {
                           <p className={`truncate text-sm font-semibold ${active ? 'text-red-300' : 'text-white'}`}>
                             {card.name}
                           </p>
-                          <p className="truncate text-xs text-neutral-400">{card.set.name}</p>
-                          <p className="text-[11px] text-neutral-500 mt-0.5">#{card.cardNumber}</p>
+                          <p className="truncate text-xs text-neutral-400">{card.set}</p>
+                          <p className="text-[11px] text-neutral-500 mt-0.5">#{card.number}</p>
                         </div>
                       </button>
                     </li>
@@ -324,8 +377,9 @@ export function AdminDashboard({ user = null }: AdminDashboardProps) {
                         alt={selected.name}
                         fill
                         sizes="(max-width: 768px) 90vw, 400px"
-                        className="object-cover"
+                        className="object-contain"
                         priority
+                        unoptimized
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-neutral-500 text-sm">
@@ -337,17 +391,70 @@ export function AdminDashboard({ user = null }: AdminDashboardProps) {
                   <div className="mt-5">
                     <h2 className="font-cinzel text-2xl font-bold text-white">{selected.name}</h2>
                     <div className="mt-3 flex flex-wrap gap-2">
-                      {selected.types && selected.types.map((t) => (
-                        <TypeChip key={t} type={t} />
-                      ))}
+                      {/* Pokémon energy types render as colored chips. */}
+                      {selected.metadata.types &&
+                        selected.metadata.types.map((t) => <TypeChip key={t} type={t} />)}
                     </div>
                     <div className="mt-4 rounded-xl border border-neutral-800/70 bg-neutral-950/40 px-4">
-                      <DetailRow label="Set">{selected.set.name}</DetailRow>
-                      <DetailRow label="Card Number">#{selected.cardNumber}</DetailRow>
+                      <DetailRow label="Game">{gameLabel}</DetailRow>
+                      <DetailRow label="Set">{selected.set}</DetailRow>
+                      <DetailRow label="Card Number">#{selected.number}</DetailRow>
                       {selected.rarity && <DetailRow label="Rarity">{selected.rarity}</DetailRow>}
-                      {selected.hp && <DetailRow label="HP">{selected.hp}</DetailRow>}
-                      {selected.artist && <DetailRow label="Artist">{selected.artist}</DetailRow>}
+
+                      {/* Pokémon-specific rows */}
+                      {selected.metadata.hp && <DetailRow label="HP">{selected.metadata.hp}</DetailRow>}
+                      {selected.metadata.artist && (
+                        <DetailRow label="Artist">{selected.metadata.artist}</DetailRow>
+                      )}
+
+                      {/* Yu-Gi-Oh!-specific rows */}
+                      {isYugioh && selected.metadata.type && (
+                        <DetailRow label="Card Type">{selected.metadata.type}</DetailRow>
+                      )}
+                      {isYugioh && selected.metadata.attribute && (
+                        <DetailRow label="Attribute">{selected.metadata.attribute}</DetailRow>
+                      )}
+                      {isYugioh && typeof selected.metadata.level === 'number' && (
+                        <DetailRow label="Level / Rank">{selected.metadata.level}</DetailRow>
+                      )}
+                      {isYugioh &&
+                        (typeof selected.metadata.atk === 'number' ||
+                          typeof selected.metadata.def === 'number') && (
+                          <DetailRow label="ATK / DEF">
+                            {typeof selected.metadata.atk === 'number' ? selected.metadata.atk : '—'}
+                            {' / '}
+                            {typeof selected.metadata.def === 'number' ? selected.metadata.def : '—'}
+                          </DetailRow>
+                        )}
+                      {isYugioh && selected.metadata.archetype && (
+                        <DetailRow label="Archetype">{selected.metadata.archetype}</DetailRow>
+                      )}
+
+                      {typeof selected.marketPrice === 'number' && (
+                        <DetailRow label="Market Price">${selected.marketPrice.toFixed(2)}</DetailRow>
+                      )}
                     </div>
+
+                    {/* Yu-Gi-Oh! cards can appear across many sets. */}
+                    {isYugioh &&
+                      selected.metadata.setNames &&
+                      selected.metadata.setNames.length > 1 && (
+                        <div className="mt-4">
+                          <p className="text-xs uppercase tracking-[0.18em] text-neutral-500 mb-2">
+                            Appears In
+                          </p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {selected.metadata.setNames.slice(0, 8).map((s) => (
+                              <span
+                                key={s}
+                                className="rounded-md border border-neutral-800 bg-neutral-950/60 px-2 py-1 text-[11px] text-neutral-300"
+                              >
+                                {s}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                   </div>
                 </div>
 
