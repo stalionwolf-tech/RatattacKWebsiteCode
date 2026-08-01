@@ -259,8 +259,23 @@ function throwOnUserErrors(errors: ShopifyUserError[] | undefined, step: string)
 /*  Public API: create a product from an inventory item                       */
 /* -------------------------------------------------------------------------- */
 
+/** Game-specific attributes carried into the Shopify product. */
+export interface InventoryItemMetadata {
+  cardType?: string;
+  attribute?: string;
+  level?: number;
+  atk?: number;
+  def?: number;
+  archetype?: string;
+  hp?: string;
+  types?: string[];
+  artist?: string;
+}
+
 export interface InventoryItem {
   name: string;
+  /** Human game label, e.g. "Pokémon" or "Yu-Gi-Oh!". Defaults to Pokémon. */
+  game?: string;
   set?: string;
   cardNumber?: string;
   rarity?: string;
@@ -269,6 +284,7 @@ export interface InventoryItem {
   price: string | number;
   imageUrl?: string;
   trackInventory?: boolean;
+  metadata?: InventoryItemMetadata;
 }
 
 export interface PublishResult {
@@ -303,14 +319,30 @@ export async function publishProduct(item: InventoryItem): Promise<PublishResult
 
   const shouldTrack = item.trackInventory !== false;
 
+  // Game label — defaults to Pokémon so legacy callers keep working exactly.
+  const game = item.game?.trim() || 'Pokémon';
+  const meta = item.metadata ?? {};
+
   // ---- Build product fields ----------------------------------------------
-  const title = `Pokemon Card - ${name}`;
+  const title = `${game} Card - ${name}`;
 
   const descriptionRows: Array<[string, string | undefined]> = [
+    ['Game', game],
     ['Card Name', name],
     ['Set', item.set],
     ['Card Number', item.cardNumber],
     ['Rarity', item.rarity],
+    // Yu-Gi-Oh! attributes (present only when supplied).
+    ['Card Type', meta.cardType],
+    ['Attribute', meta.attribute],
+    ['Level / Rank', typeof meta.level === 'number' ? String(meta.level) : undefined],
+    ['ATK', typeof meta.atk === 'number' ? String(meta.atk) : undefined],
+    ['DEF', typeof meta.def === 'number' ? String(meta.def) : undefined],
+    ['Archetype', meta.archetype],
+    // Pokémon attributes (present only when supplied).
+    ['HP', meta.hp],
+    ['Type', meta.types?.length ? meta.types.join(', ') : undefined],
+    ['Artist', meta.artist],
     ['Condition', item.condition],
     ['Quantity', String(quantity)],
     ['Price', `$${priceNumber.toFixed(2)}`],
@@ -320,10 +352,22 @@ export async function publishProduct(item: InventoryItem): Promise<PublishResult
     .map(([k, v]) => `<li><strong>${escapeHtml(k)}:</strong> ${escapeHtml(String(v))}</li>`)
     .join('')}</ul>`;
 
-  const tags = ['Pokemon', 'Pokemon Singles'];
+  // Every product is tagged with its game so the storefront can filter by it.
+  const tags = [game, `Game: ${game}`, `${game} Singles`];
   if (item.set) tags.push(item.set);
   if (item.condition) tags.push(item.condition);
   if (item.rarity) tags.push(item.rarity);
+  if (meta.archetype) tags.push(meta.archetype);
+
+  // Structured metafield so the game is queryable/filterable in Shopify.
+  const metafields = [
+    {
+      namespace: 'ratattack',
+      key: 'game',
+      type: 'single_line_text_field',
+      value: game,
+    },
+  ];
 
   const media =
     item.imageUrl && /^https?:\/\//.test(item.imageUrl)
@@ -361,9 +405,10 @@ export async function publishProduct(item: InventoryItem): Promise<PublishResult
         title,
         descriptionHtml,
         vendor: 'RatAttacK TCG',
-        productType: 'Pokemon Singles',
+        productType: `${game} Singles`,
         status: 'ACTIVE',
         tags,
+        metafields,
       },
       media,
     },

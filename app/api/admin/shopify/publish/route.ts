@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { publishProduct, ShopifyError, type InventoryItem } from '@/lib/shopify-admin';
+import { getGameLabel, isGameId, DEFAULT_GAME } from '@/lib/tcg/registry';
 
 /**
  * POST /api/admin/shopify/publish
@@ -55,15 +56,24 @@ export async function POST(request: Request) {
       );
     }
 
-    const { card, condition, quantity, price, trackInventory } = body ?? {};
+    const { card, game: gameFromBody, condition, quantity, price, trackInventory } = body ?? {};
 
     // ---- 4. Validate before touching Shopify ------------------------------
     if (!card?.name) {
       return NextResponse.json(
-        { success: false, error: 'A Pokémon card must be selected.' },
+        { success: false, error: 'A card must be selected.' },
         { status: 400 },
       );
     }
+
+    // Resolve the game from the explicit body field, the card itself, or the
+    // default — so publishing works for every current and future game.
+    const gameId = isGameId(gameFromBody)
+      ? gameFromBody
+      : isGameId(card?.game)
+        ? card.game
+        : DEFAULT_GAME;
+    const gameLabel = getGameLabel(gameId);
     const priceNumber = Number(price);
     if (!Number.isFinite(priceNumber) || priceNumber <= 0) {
       return NextResponse.json(
@@ -79,16 +89,36 @@ export async function POST(request: Request) {
       );
     }
 
+    // Support the normalized model (card.set is a string, card.number) while
+    // remaining backward-compatible with the legacy Pokémon shape
+    // (card.set.name, card.cardNumber).
+    const setName =
+      typeof card.set === 'string' ? card.set : card.set?.name || undefined;
+    const cardNumber = card.number ?? card.cardNumber;
+    const meta = card.metadata ?? {};
+
     const item: InventoryItem = {
       name: card.name,
-      set: card.set?.name,
-      cardNumber: card.cardNumber ? String(card.cardNumber) : undefined,
+      game: gameLabel,
+      set: setName,
+      cardNumber: cardNumber ? String(cardNumber) : undefined,
       rarity: card.rarity || undefined,
       condition: condition || 'Unspecified',
       quantity: Math.floor(quantityNumber),
       price: priceNumber,
       imageUrl: card.image || undefined,
       trackInventory: Boolean(trackInventory),
+      metadata: {
+        cardType: meta.type || undefined,
+        attribute: meta.attribute || undefined,
+        level: typeof meta.level === 'number' ? meta.level : undefined,
+        atk: typeof meta.atk === 'number' ? meta.atk : undefined,
+        def: typeof meta.def === 'number' ? meta.def : undefined,
+        archetype: meta.archetype || undefined,
+        hp: meta.hp || undefined,
+        types: Array.isArray(meta.types) && meta.types.length ? meta.types : undefined,
+        artist: meta.artist || undefined,
+      },
     };
 
     // ---- 5. Authenticate + create product ---------------------------------
