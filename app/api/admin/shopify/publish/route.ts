@@ -118,6 +118,17 @@ export async function POST(request: Request) {
         hp: meta.hp || undefined,
         types: Array.isArray(meta.types) && meta.types.length ? meta.types : undefined,
         artist: meta.artist || undefined,
+        // Magic: The Gathering
+        manaCost: meta.manaCost || undefined,
+        cmc: typeof meta.cmc === 'number' ? meta.cmc : undefined,
+        typeLine: meta.typeLine || undefined,
+        oracleText: meta.oracleText || undefined,
+        power: meta.power || undefined,
+        toughness: meta.toughness || undefined,
+        loyalty: meta.loyalty || undefined,
+        colors: Array.isArray(meta.colors) && meta.colors.length ? meta.colors : undefined,
+        foil: typeof meta.foil === 'boolean' ? meta.foil : undefined,
+        nonfoil: typeof meta.nonfoil === 'boolean' ? meta.nonfoil : undefined,
       },
     };
 
