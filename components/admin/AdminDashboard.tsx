@@ -2,9 +2,11 @@
 
 import { useMemo, useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import {
   Search,
   Package,
+  Boxes,
   UploadCloud,
   Sparkles,
   Loader2,
@@ -231,6 +233,12 @@ export function AdminDashboard({ user = null }: AdminDashboardProps) {
                 </p>
               </div>
             ) : null}
+            <Link
+              href="/admin/packs"
+              className="inline-flex h-10 items-center gap-2 rounded-md border border-neutral-700 bg-neutral-950/60 px-3 text-[11px] font-cinzel uppercase tracking-widest text-neutral-200 transition-colors hover:border-red-700 hover:bg-red-950/30"
+            >
+              <Boxes className="h-4 w-4" /> Mystery Packs
+            </Link>
             <SignOutButton className="h-10 gap-2 border-neutral-700 bg-neutral-950/60 hover:border-red-700 hover:bg-red-950/30" />
           </div>
         </div>
