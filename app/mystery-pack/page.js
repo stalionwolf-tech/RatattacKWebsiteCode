@@ -4,7 +4,7 @@ import { Footer } from '@/components/site/Footer';
 import { AtmosphereBackground } from '@/components/site/AtmosphereBackground';
 import { FilmGrain, Scanlines } from '@/components/site/CinematicFX';
 import { MysteryPackExperience } from '@/components/mystery/MysteryPackExperience';
-import { getActivePack, getArchivePacks } from '@/lib/mystery-packs';
+import { getActivePack, getArchivePacks, defaultSeed } from '@/lib/mystery-packs';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,8 +36,18 @@ async function buildQrMap(packs) {
 }
 
 export default async function MysteryPackPage() {
-  const active = await getActivePack();
-  const archive = await getArchivePacks(active?.id);
+  let active = null;
+  let archive = [];
+  try {
+    active = await getActivePack();
+    archive = await getArchivePacks(active?.id);
+  } catch (err) {
+    // Database unavailable (e.g. preview without MONGO_URL) — fall back to the
+    // built-in default run so the page still renders meaningfully.
+    console.log('[v0] mystery-pack: DB unavailable, using default seed:', err.message);
+    active = defaultSeed();
+    archive = [];
+  }
 
   const allPacks = [active, ...archive].filter(Boolean);
   const qrMap = await buildQrMap(allPacks);
