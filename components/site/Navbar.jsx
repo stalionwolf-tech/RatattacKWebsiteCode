@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 const NAV_LINKS = [
   { href: '/#about', label: 'About' },
   { href: '/store', label: 'Store' },
+  { href: '/mystery-pack', label: 'Mystery Pack' },
   { href: '/#community', label: 'Community' },
   { href: '/#videos', label: 'Videos' },
   { href: '/#contact', label: 'Contact' },
