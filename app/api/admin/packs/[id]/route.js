@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getPackById, updatePack, deletePack } from '@/lib/mystery-packs';
-import { ConfigError, classifyMongoError } from '@/lib/mongo';
+import { ConfigError, classifyMongoError } from '@/lib/mongodb';
 
 export const dynamic = 'force-dynamic';
 
