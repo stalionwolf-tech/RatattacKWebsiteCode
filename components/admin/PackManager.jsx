@@ -90,6 +90,7 @@ function emptyPack() {
 export function PackManager({ user = null }) {
   const { data, isLoading, mutate } = useSWR('/api/admin/packs', fetcher);
   const packs = data?.packs || [];
+  const configError = data?.configError ? data.error : null;
 
   const [selectedId, setSelectedId] = useState(null); // null = nothing, 'new' = creating
   const [form, setForm] = useState(null);
@@ -208,6 +209,18 @@ export function PackManager({ user = null }) {
       </header>
 
       <main className="mx-auto max-w-7xl px-4 md:px-8 py-6 md:py-8">
+        {configError ? (
+          <div className="mb-6 flex items-start gap-3 rounded-lg border border-red-800/60 bg-red-950/40 px-4 py-3 text-sm text-red-200">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+            <div className="space-y-1">
+              <p className="font-cinzel uppercase tracking-widest text-red-300">
+                Database not configured
+              </p>
+              <p>{configError}</p>
+            </div>
+          </div>
+        ) : null}
+
         {activeCount > 1 ? (
           <div className="mb-6 flex items-start gap-3 rounded-lg border border-amber-800/60 bg-amber-950/30 px-4 py-3 text-sm text-amber-200">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
