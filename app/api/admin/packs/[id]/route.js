@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getPackById, updatePack, deletePack } from '@/lib/mystery-packs';
-import { ConfigError } from '@/lib/mongo';
+import { ConfigError, classifyMongoError } from '@/lib/mongo';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,21 +8,29 @@ const CONFIG_HELP =
   'MongoDB has not been configured yet. Please add MONGO_URL and DB_NAME to your environment variables.';
 
 /**
- * Map any thrown error to a JSON response. Configuration problems become a
- * friendly 503; everything else is a 500. We NEVER let the handler throw,
- * so the client always receives JSON (never an HTML error page).
+ * Map any thrown error to a structured JSON response. Configuration problems
+ * become a friendly 503; connection problems are classified (category +
+ * recommended fix). We NEVER let the handler throw, so the client always
+ * receives JSON (never an HTML error page).
  */
 function errorResponse(e) {
   if (e instanceof ConfigError) {
     console.error('[MysteryPack] Configuration error:', e.message);
     return NextResponse.json(
-      { success: false, configError: true, error: CONFIG_HELP, detail: e.message },
+      { success: false, configError: true, category: 'configuration', error: CONFIG_HELP, detail: e.message },
       { status: 503 },
     );
   }
-  console.error('[MysteryPack] Request failed:', e?.message || e);
+  const info = classifyMongoError(e);
+  console.error(`[MysteryPack] Request failed (${info.category}): ${info.message}`);
   return NextResponse.json(
-    { success: false, error: e?.message || 'Unexpected server error.' },
+    {
+      success: false,
+      category: info.category,
+      error: info.message,
+      recommendation: info.recommendation,
+      detail: info.details,
+    },
     { status: 500 },
   );
 }

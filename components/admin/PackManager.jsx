@@ -5,6 +5,7 @@ import useSWR from 'swr';
 import Link from 'next/link';
 import {
   Boxes,
+  Database,
   Plus,
   Trash2,
   Save,
@@ -138,7 +139,18 @@ export function PackManager({ user = null }) {
         body: JSON.stringify(form),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || `Request failed (${res.status})`);
+      if (!res.ok) {
+        // Surface the exact failure category + recommended fix instead of a
+        // generic "Save failed".
+        const title = json?.category
+          ? `Database error: ${json.category.replace(/_/g, ' ')}`
+          : 'Save failed';
+        const description = [json?.error, json?.recommendation]
+          .filter(Boolean)
+          .join(' — ') || `Request failed (${res.status})`;
+        toast.error(title, { description });
+        return;
+      }
       toast.success(isNew ? 'Production run created.' : 'Production run saved.');
       await mutate();
       setSelectedId(json.pack.id);
@@ -195,6 +207,12 @@ export function PackManager({ user = null }) {
               className="hidden sm:inline-flex h-10 items-center gap-2 rounded-md border border-neutral-700 bg-neutral-950/60 px-3 text-[11px] font-cinzel uppercase tracking-widest text-neutral-200 transition-colors hover:border-red-700 hover:bg-red-950/30"
             >
               <ChevronLeft className="h-4 w-4" /> Inventory
+            </Link>
+            <Link
+              href="/admin/diagnostics"
+              className="hidden sm:inline-flex h-10 items-center gap-2 rounded-md border border-neutral-700 bg-neutral-950/60 px-3 text-[11px] font-cinzel uppercase tracking-widest text-neutral-200 transition-colors hover:border-red-700 hover:bg-red-950/30"
+            >
+              <Database className="h-4 w-4" /> Diagnostics
             </Link>
             <Link
               href="/mystery-pack"
