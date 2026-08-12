@@ -4,6 +4,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { AmbientAudioPlayer } from '@/components/site/AmbientAudioPlayer';
 import { CustomCursor } from '@/components/site/CustomCursor';
 import { AuthProvider } from '@/components/auth/AuthProvider';
+import { GoogleAdsTag } from '@/components/analytics/GoogleAdsTag';
 import { SITE_CONFIG, SITE_URL } from '@/lib/config';
 
 export const metadata = {
@@ -79,6 +80,9 @@ export default function RootLayout({ children }) {
           <Toaster theme="dark" position="bottom-right" />
         </AuthProvider>
         {enableGA ? <GoogleAnalytics gaId={gaMeasurementId} /> : null}
+        {/* Google Ads global tag (AW-18384560257). Public storefront only —
+            excludes /admin/* and, like GA above, is production-gated. */}
+        <GoogleAdsTag />
       </body>
     </html>
   );
